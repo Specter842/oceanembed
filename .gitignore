@@ -35,3 +35,5 @@ config.local.*
 outputs/checkpoints/*.pt
 outputs/metrics/_*.log
 outputs/metrics/train_log_*.csv
+outputs/metrics/predictions_*.npz
+outputs/figures/*.png
