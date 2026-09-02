@@ -1,0 +1,33 @@
+# Environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Data — never commit downloaded source files or derived tensors
+data/raw/*
+data/interim/*
+data/processed/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+# Phase 0 report IS tracked (it's the deliverable, not data):
+!data/raw/phase0_report.md
+!data/raw/phase0_results.json
+
+# Model artifacts
+outputs/checkpoints/
+outputs/figures/*
+!outputs/figures/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Secrets — data-source credentials go here, never committed
+.env
+secrets.toml
+config.local.*

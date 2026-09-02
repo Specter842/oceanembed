@@ -1,0 +1,39 @@
+# OceanEmbed — dependencies
+# Installed in tiers to keep early phases fast.
+#
+# Python: target was 3.11 (CLAUDE.md §1); actual env is 3.14 — flagged, low risk.
+#   Confirmed working on 3.14 (2026-09): numpy, pandas, scipy, xarray, netCDF4,
+#   h5py/h5netcdf, gsw, pyarrow.  argopy could NOT be installed (its aiohttp dep
+#   has no 3.14 wheel and no build toolchain here) — not needed; we use erddapy /
+#   raw ERDDAP against AOML instead.
+
+# --- Tier 1: data access (Phase 0 + Phase 1) — INSTALLED ---
+numpy
+pandas
+scipy
+xarray
+netCDF4
+h5netcdf
+h5py
+pyarrow
+requests
+erddapy
+pydap
+python-dateutil
+
+# --- Tier 2: modeling (Phase 2) ---
+gsw                 # INSTALLED (needed by src/regime/build_climatology.py already)
+# torch             # CPU build — install before Phase 2 (no CUDA GPU: Intel Iris Xe)
+# torchvision
+# huggingface_hub
+
+# --- Tier 3: dashboard + viz (Phase 3 plots + Phase 4) ---
+# matplotlib
+# plotly
+# streamlit
+
+# --- Optional / best-effort (CLAUDE.md §1) ---
+# xesmf             # conda-only on Windows; not used — nearest-neighbour regrid in xarray suffices
+
+# --- Dev ---
+pytest
