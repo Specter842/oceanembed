@@ -1,62 +1,119 @@
 # Running OceanEmbed
 
-Interim run notes. Folds into README at Phase 4.
+Two machines are involved:
+- **this PC** (no CUDA GPU) — data pipeline + code, smoke-tested only
+- **Lenovo LOQ** (CUDA GPU) — the real training + evaluation runs
 
-## Environment
+Everything is CPU/GPU-agnostic; `src/train.py` auto-detects CUDA and turns on AMP.
 
-```
+---
+
+## 0. Environment
+
+```bash
 python -m venv .venv
-.venv\Scripts\activate            # Windows
+.venv/Scripts/activate            # Windows;  source .venv/bin/activate on Linux
 pip install -r requirements.txt
-# GPU box (Lenovo LOQ): install the CUDA build of torch instead of the CPU one
+```
+
+On the LOQ, install the CUDA build of torch instead of the CPU one:
+
+```bash
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
 ```
 
-Dev box here: Python 3.14, **no CUDA** (Intel Iris Xe) — everything runs CPU, slowly.
-`argopy` will not install on 3.14 (no aiohttp wheel); not needed.
+Optional (for the Prithvi-EO backbone — see step 3):
 
-## Data pipeline (Phase 0-1) — already run, cached under data/
-
+```bash
+pip install terratorch
 ```
-python -m src.data_access.fetch_argo      --start 2021-01 --end 2023-12
-python -m src.data_access.fetch_satellite --start 2021-01 --end 2023-12
+
+Python 3.14 works. `argopy` does **not** install on 3.14 and is not needed.
+
+---
+
+## 1. Data pipeline  (already run on this PC; re-run only to rebuild)
+
+```bash
+python -m src.data_access.fetch_argo       --start 2021-01 --end 2023-12
+python -m src.data_access.fetch_satellite  --start 2021-01 --end 2023-12
 python -m src.data_access.fetch_woa
-python -m src.data_access.fetch_incois
 python -m src.regime.build_climatology
-python -m src.data_pipeline --patch 32
-pytest -q
+python -m src.data_access.fetch_incois            # INCOIS probe + RAMA download
+python -m src.data_pipeline --patch 32            # -> data/processed/*.npz
+pytest -q                                         # regime independence + split integrity
 ```
 
-Produces `data/processed/{train,test_spatial,test_temporal}.npz` + `norm_stats.json`.
+Reachable data sources are pinned in `src/data_access/common.py` (this network
+cannot reach ifremer / seanoe / pfeg — NOAA-hosted equivalents are used).
+`data/raw/phase0_report.md` has the full account.
 
-## Training (Phase 2)
+Outputs: `data/processed/{train,test_spatial,test_temporal}.npz` + `norm_stats.json`.
 
-```
-# quick sanity (CPU, ~1 min)
-python -m src.train --smoke --models both
+---
 
-# full run — do this on the Lenovo LOQ (auto-uses CUDA + AMP)
+## 2. Training  (run on the LOQ)
+
+Full run — OceanEmbed **and** the baseline (§5.5), same split, same seed:
+
+```bash
 python -m src.train --models both --backbone resnet50 --epochs 40 --batch-size 128
-
-# geospatial foundation model (needs: pip install terratorch)
-python -m src.train --models oceanembed --backbone prithvi --epochs 40
-python -m src.train --models baseline   --backbone prithvi --epochs 40
 ```
 
-`--models both` trains OceanEmbed (FiLM regime-conditioning + physics loss) and the
-baseline (identical, no FiLM, no physics term) on the same split — §5.5.
+- `--models both` writes `outputs/checkpoints/oceanembed.pt` and `baseline.pt`.
+- The baseline is auto-derived: identical config, `use_film=False`,
+  `lambda_physics=0`.
+- CUDA + AMP kick in automatically; on CPU it falls back (slower, still works).
+- `--freeze-backbone true` (default) trains only the adapter + FiLM + decoder
+  (~0.6 M params). Set `false` to fine-tune the whole backbone if VRAM allows.
 
-Outputs: `outputs/checkpoints/{oceanembed,baseline}.pt`,
-`outputs/metrics/train_log_*.csv`.
+`lambda_physics` sweep (§5.4 — a couple of values, ~1 h budget):
 
-Rough CPU timing here: resnet18 ~10 s/epoch. resnet50 on the LOQ GPU should be
-a few seconds/epoch at batch 128.
-
-### lambda_physics sweep (§5.4, optional, <1 h)
-
+```bash
+python -m src.train --models oceanembed --lambda-physics 0.05 --name oe_lp05 --epochs 40 --backbone resnet50
+python -m src.train --models oceanembed --lambda-physics 0.30 --name oe_lp30 --epochs 40 --backbone resnet50
 ```
-for L in 0.05 0.1 0.3; do
-  python -m src.train --models oceanembed --backbone resnet50 --epochs 30 \
-      --lambda-physics $L --name oceanembed_lp$L
-done
+
+Smoke test (any machine, ~1 min): `python -m src.train --smoke --models both`
+
+---
+
+## 3. Prithvi-EO backbone  (optional, LOQ)
+
+```bash
+pip install terratorch
+python -m src.train --models both --backbone prithvi --epochs 40 --batch-size 32 --freeze-backbone true
+```
+
+`src/models/backbone.py` adapts the 3 ocean channels to Prithvi's 6-band stem
+and upsamples patches to 224 px. If `terratorch` or the weights are missing it
+logs a warning and falls back to ResNet-50, so the command never hard-fails.
+
+---
+
+## 4. Evaluation + figures  (run wherever the checkpoints are)
+
+```bash
+python -m src.evaluate                    # both checkpoints x both holdouts
+python -m src.viz.plots
+```
+
+Writes:
+- `outputs/metrics/per_regime_rmse.csv`  — the key table (§6.1)
+- `outputs/metrics/physics_diagnostics.csv`  — TEOS-10 inversion rate (gsw)
+- `outputs/metrics/predictions_<model>_<set>.npz`
+- `outputs/figures/{rmse_by_regime,profiles_barrier_layer,uncertainty_map_bob}.png`
+
+`--mc-dropout 20` uses MC-dropout for uncertainty instead of the log-variance head.
+
+Then update `outputs/metrics/PHASE3_FINDINGS.md` / the README results section with
+the real numbers. **Do not tune to make OceanEmbed win the barrier-layer regime**
+(CLAUDE.md §6.2 / §8) — report what the run produces.
+
+---
+
+## 5. Dashboard  (Phase 4)
+
+```bash
+streamlit run dashboard/app.py
 ```
