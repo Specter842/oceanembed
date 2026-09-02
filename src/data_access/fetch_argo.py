@@ -23,7 +23,11 @@ import pandas as pd
 from .common import NIO_BOX, RAW, INTERIM, FetchError, http_get, open_netcdf_bytes
 
 ERDDAP = "https://erddap.aoml.noaa.gov/hdb/erddap/tabledap"
-VARS = "time,latitude,longitude,PLATFORM_NUMBER,PRES,TEMP,PSAL"
+VARS = ("time,latitude,longitude,PLATFORM_NUMBER,"
+        "PRES,PRES_QC,PRES_ADJUSTED,PRES_ADJUSTED_QC,"
+        "TEMP,TEMP_QC,TEMP_ADJUSTED,TEMP_ADJUSTED_QC,"
+        "PSAL,PSAL_QC,PSAL_ADJUSTED,PSAL_ADJUSTED_QC")
+GOOD_QC = {"1", "2"}          # good / probably good (Argo reference table 2)
 
 # era dataset -> (first year, last year inclusive; 9999 = present)
 ERAS = [
@@ -34,9 +38,9 @@ ERAS = [
     ("argo_float_indian_2025_present", 2025, 9999),
 ]
 
-# physically plausible ranges — coarse QC in lieu of per-point QC flags (v1)
-T_RANGE = (-2.5, 40.0)
-S_RANGE = (0.0, 42.0)
+# hard physical clamp AFTER QC filtering (North Indian Ocean)
+T_RANGE = (-2.0, 36.0)
+S_RANGE = (3.0, 41.5)
 P_RANGE = (0.0, 2100.0)
 
 
@@ -68,7 +72,7 @@ def fetch_month(y: int, m: int, box=NIO_BOX, cache=True) -> pd.DataFrame:
     """Pull one month of profiles as a tidy long DataFrame (one row per level)."""
     raw_dir = RAW / "argo"
     raw_dir.mkdir(parents=True, exist_ok=True)
-    cache_nc = raw_dir / f"argo_{y}{m:02d}.nc"
+    cache_nc = raw_dir / f"argo_v2_{y}{m:02d}.nc"     # v2 = includes QC + ADJUSTED
 
     t0, t1 = _month_bounds(y, m)
     if cache and cache_nc.exists() and cache_nc.stat().st_size > 0:
@@ -90,23 +94,49 @@ def fetch_month(y: int, m: int, box=NIO_BOX, cache=True) -> pd.DataFrame:
             raise
         cache_nc.write_bytes(body)
 
-    ds = open_netcdf_bytes(body, f"argo_{y}{m:02d}.nc")
+    ds = open_netcdf_bytes(body, f"argo_v2_{y}{m:02d}.nc")
+    n = ds.sizes["row"]
+    good = np.array(sorted(int(x) for x in GOOD_QC))
+
+    def qc_ok(name):
+        """QC flag in {1,2}. ERDDAP returns these as float (1.0, 2.0, ...) or char."""
+        if name not in ds:
+            return np.zeros(n, bool)
+        v = ds[name].values
+        try:
+            q = np.asarray(v, "float64")
+        except (ValueError, TypeError):
+            q = np.array([float(str(x).strip() or "nan")
+                          if str(x).strip() not in ("", "b''") else np.nan for x in v])
+        return np.isin(np.floor(np.nan_to_num(q, nan=0.0)).astype(int), good)
+
+    def best(raw_name, adj_name):
+        """prefer ADJUSTED value where its QC is good, else raw where its QC is good."""
+        raw = np.asarray(ds[raw_name].values, "float64")
+        out = np.where(qc_ok(raw_name + "_QC"), raw, np.nan)
+        if adj_name in ds:
+            adj = np.asarray(ds[adj_name].values, "float64")
+            use_adj = qc_ok(adj_name + "_QC") & np.isfinite(adj)
+            out = np.where(use_adj, adj, out)
+        return out
+
     df = pd.DataFrame({
         "time": pd.to_datetime(ds["time"].values),
         "lat": np.asarray(ds["latitude"].values, "float64"),
         "lon": np.asarray(ds["longitude"].values, "float64"),
         "platform": np.asarray(ds["PLATFORM_NUMBER"].values).astype(str),
-        "pres": np.asarray(ds["PRES"].values, "float64"),
-        "temp": np.asarray(ds["TEMP"].values, "float64"),
-        "psal": np.asarray(ds["PSAL"].values, "float64"),
+        "pres": best("PRES", "PRES_ADJUSTED"),
+        "temp": best("TEMP", "TEMP_ADJUSTED"),
+        "psal": best("PSAL", "PSAL_ADJUSTED"),
     })
     ds.close()
 
+    df = df.dropna(subset=["pres", "temp", "psal"])
     df = df[
         df["temp"].between(*T_RANGE)
         & df["psal"].between(*S_RANGE)
         & df["pres"].between(*P_RANGE)
-    ].dropna(subset=["pres", "temp", "psal"])
+    ]
     # profile id = platform + rounded timestamp + rounded position
     df["profile_id"] = (
         df["platform"].str.strip()

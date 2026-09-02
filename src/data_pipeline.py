@@ -66,16 +66,34 @@ CH_VALID = {"sst": (10.0, 36.0), "ssh": (-1.5, 1.5), "sss": (20.0, 41.0)}
 # --------------------------------------------------------------------------- #
 
 def _profile_to_levels(pres, temp, psal, levels):
-    """Linear-interp one profile onto `levels`; mask = coverage."""
+    """Linear-interp one profile onto `levels`; mask = coverage.
+
+    Returns None if the profile fails a physical sanity check (deep-water T/S
+    out of range, or a gross unstable inversion) — a second line of defence
+    behind Argo QC flags.
+    """
     order = np.argsort(pres)
     p, t, s = pres[order], temp[order], psal[order]
     keep = np.isfinite(p) & np.isfinite(t) & np.isfinite(s)
     p, t, s = p[keep], t[keep], s[keep]
     if p.size < 5:
         return None
-    # collapse duplicate pressures
     p, idx = np.unique(p, return_index=True)
     t, s = t[idx], s[idx]
+
+    # deep-water sanity (Indian Ocean @ >=900 dbar: T ~2-12 C, S ~34.5-35.3)
+    deep = p >= 900
+    if deep.any():
+        if not (2.0 <= t[deep].min() and t[deep].max() <= 13.0):
+            return None
+        if not (34.3 <= s[deep].min() and s[deep].max() <= 35.6):
+            return None
+    # sub-thermocline sanity: below 250 dbar the N Indian Ocean stays saline;
+    # a fresh reading there means a corrupted profile that slipped past QC.
+    sub = (p >= 250) & (p <= 900)
+    if sub.any() and s[sub].min() < 33.8:
+        return None
+
     T = np.full(len(levels), np.nan, "float32")
     S = np.full(len(levels), np.nan, "float32")
     M = np.zeros(len(levels), "float32")
@@ -85,6 +103,13 @@ def _profile_to_levels(pres, temp, psal, levels):
         T[i] = np.interp(z, p, t)
         S[i] = np.interp(z, p, s)
         M[i] = 1.0
+
+    # reject if temperature increases strongly with depth over a resolved span
+    valid = M > 0
+    if valid.sum() >= 3:
+        Tv = T[valid]
+        if np.max(np.diff(Tv)) > 3.0:          # >3 C warming step downward = bad
+            return None
     return T, S, M
 
 
