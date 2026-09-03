@@ -22,6 +22,16 @@ Salinity, BoB barrier-layer: baseline 0.443 vs OceanEmbed 0.450 PSU — also a w
 Density-inversion fraction (TEOS-10, gsw): ~0.00 for both models → the physics
 term has little to correct here.
 
+### lambda_physics sweep (§5.4)
+
+lambda in {0.05, 0.10, 0.30} gives **identical** RMSE to 3 decimals on every
+regime and both holdouts (`oceanembed` = 0.10, `oceanembed_lp05`, `oceanembed_lp30`
+in `per_regime_rmse.csv`). The physics-consistency term is **inactive for this
+problem**: both models already produce density-stable profiles (inversion
+fraction 0.000) with or without it, so the penalty has nothing to push against.
+It is not harmful — just not doing work at this data scale. Worth re-checking on
+the full LOQ runs, but don't expect it to move the needle.
+
 ## Honest assessment (CLAUDE.md §6.2 / §8)
 
 **On the primary holdout — the Bay of Bengal, barrier-layer regime — OceanEmbed
