@@ -120,6 +120,27 @@ def regime_onehot(regime_class: str) -> np.ndarray:
     return v
 
 
+def regime_grid(month: int, step: float = 1.0):
+    """lat/lon grid of regime-class indices for a month (for maps). Uses the
+    climatology's own extent. Returns an xarray.DataArray of ints (-1 = no data)."""
+    import xarray as xr
+
+    c = _clim()
+    lats = np.arange(float(c.lat.min()), float(c.lat.max()) + step, step)
+    lons = np.arange(float(c.lon.min()), float(c.lon.max()) + step, step)
+    disch = discharge_for_month(month)
+    g = np.full((len(lats), len(lons)), -1, "int8")
+    for i, la in enumerate(lats):
+        for j, lo in enumerate(lons):
+            cell = c.sel(month=month, lat=la, lon=lo, method="nearest")
+            if not np.isfinite(float(cell["mld_m"].values)):
+                continue
+            lab = compute_regime_label(la, lo, month, disch)
+            g[i, j] = REGIME_CLASSES.index(lab["regime_class"])
+    return xr.DataArray(g, coords={"lat": lats, "lon": lons}, dims=("lat", "lon"),
+                        name="regime_class_idx")
+
+
 if __name__ == "__main__":
     # quick smoke: N Bay of Bengal in Sep (expect barrier_layer), N Arabian Sea in
     # Feb (expect well_mixed), Somali coast in Aug (expect upwelling).
