@@ -114,25 +114,39 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   display:flex; align-items:center; justify-content:center;
   color:#0D0D0D; margin-bottom:.9rem; }
 .oe-brand .material-symbols-rounded { font-size:24px; }
-.oe-h1 { font-weight:700; font-size:2.9rem; line-height:1.04; letter-spacing:-1.4px;
-  color:#0D0D0D; margin:0 0 1.3rem; }
+.oe-h1 { font-weight:700; font-size:2.7rem; line-height:1.05; letter-spacing:-1.3px;
+  color:#0D0D0D; margin:0 0 1.1rem; }
 .oe-h1 .hl { background:#6FC0F5; border-radius:11px; padding:0 .26rem; box-decoration-break:clone; }
 
 /* ---- pill tab bar (model / holdout / variable only) ---- */
-:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) div[role="radiogroup"] { flex-direction:row !important; flex-wrap:wrap;
-  gap:.34rem; align-items:center; }
-:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"] { background:#FFF; border:1px solid #DCE7EE;
-  border-radius:999px; padding:.32rem .8rem !important; margin:0 !important; cursor:pointer;
-  transition:.12s; }
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) div[role="radiogroup"] {
+  flex-direction:row !important; flex-wrap:nowrap !important; gap:.3rem; align-items:center; }
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"] {
+  background:#FFF; border:1.5px solid #CBDBE7; border-radius:999px;
+  padding:.3rem .62rem !important; margin:0 !important; cursor:pointer; transition:.12s; flex:none; }
 :is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"]:hover { border-color:#0D0D0D; }
-/* kill the radio circle: the inner mark and the outer ring live in eqiohyi4/5 */
-:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"] [class*="eqiohyi4"] { background:none !important;
-  border:none !important; box-shadow:none !important; min-width:0 !important; width:auto !important; }
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"] [class*="eqiohyi4"] {
+  background:none !important; border:none !important; box-shadow:none !important; min-width:0 !important; width:auto !important; }
 :is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"] [class*="eqiohyi5"] { display:none !important; }
-:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"] p { font-size:.8rem !important; font-weight:500;
-  color:#111 !important; margin:0 !important; white-space:nowrap; }
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"] p {
+  font-size:.74rem !important; font-weight:600; color:#111 !important; margin:0 !important;
+  white-space:nowrap; text-transform:none !important; letter-spacing:0 !important; }
 :is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"]:has(input:checked) { background:#0D0D0D; border-color:#0D0D0D; }
 :is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"]:has(input:checked) p { color:#F3F8FC !important; }
+
+/* ---- top-right action buttons + inline control labels ---- */
+.oe-topright { position:absolute; top:1.9rem; right:2.3rem; display:flex; gap:.5rem;
+  align-items:center; z-index:6; }
+.oe-topright a { text-decoration:none; display:inline-flex; align-items:center; gap:.4rem;
+  font-size:.8rem; font-weight:600; transition:.12s; }
+.oe-ctllab { font-size:.66rem; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+  color:#8FA0AB; white-space:nowrap; text-align:right; }
+.oe-topright .pill { background:#0D0D0D; color:#F3F8FC; border-radius:999px; padding:.5rem .95rem; }
+.oe-topright .pill:hover { background:#242424; }
+.oe-topright .ico { width:2.4rem; height:2.4rem; border-radius:999px; background:#FFF;
+  border:1.5px solid #CBDBE7; color:#0D0D0D; justify-content:center; }
+.oe-topright .ico:hover { border-color:#0D0D0D; }
+.oe-topright .material-symbols-rounded { font-size:19px; }
 
 /* ---- section header ---- */
 .oe-sec { display:flex; align-items:center; gap:.75rem; margin:2.4rem 0 1rem; }
@@ -145,10 +159,14 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .oe-sec .hint { font-size:.76rem; color:#8FA0AB; }
 
 /* ---- cards ---- */
-.oe-card { background:#FFF; border:1px solid #E6EEF4; border-radius:24px; padding:1.15rem 1.3rem; height:100%; }
-.oe-card.lime { background:#6FC0F5; border-color:#6FC0F5; }
-.oe-card.lime .lab, .oe-card.lime .unit { color:rgba(13,13,13,.62) !important; }
-.oe-card.ink  { background:#0D0D0D; border-color:#0D0D0D; }
+[data-testid="stHorizontalBlock"] { align-items:stretch; gap:.9rem; }
+[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] { height:100%; }
+.oe-card { background:#FFF; border:1.5px solid #CBDBE7; border-radius:24px;
+  padding:1.15rem 1.3rem; height:100%; }
+.oe-card.hero { min-height:12.5rem; display:flex; flex-direction:column; }
+.oe-card.lime { background:#6FC0F5; border-color:#3E9AD6; }
+.oe-card.lime .lab, .oe-card.lime .unit { color:rgba(13,13,13,.64) !important; }
+.oe-card.ink  { background:#0D0D0D; border-color:#333B41; }
 .oe-card .lab { font-size:.72rem; font-weight:600; letter-spacing:.6px; text-transform:uppercase; color:#8FA0AB; }
 .oe-card.ink .lab { color:#8A97A1; }
 .oe-card .val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:2.9rem;
@@ -167,13 +185,13 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .oe-dom i.e { border:1.5px dashed #BDCAD3; }
 .oe-card.lime .oe-dom i.e { border-color:rgba(0,0,0,.28); }
 .oe-card.ink .oe-dom i.e { border-color:#333; }
-.oe-insight { margin-top:1rem; font-size:.82rem; line-height:1.5; color:#B9C6CF; }
+.oe-insight { margin-top:auto; padding-top:.9rem; font-size:.8rem; line-height:1.45; color:#AFC0CC; }
 .oe-insight b { color:#6FC0F5; }
-.oe-mini { background:#FFF; border:1px solid #E6EEF4; border-radius:18px; padding:.85rem 1rem; }
+.oe-mini { background:#FFF; border:1.5px solid #CBDBE7; border-radius:18px; padding:.85rem 1rem; height:100%; }
 .oe-mini .lab { font-size:.66rem; font-weight:600; letter-spacing:.5px; text-transform:uppercase; color:#8FA0AB; }
 .oe-mini .val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.4rem; color:#0D0D0D; margin-top:.15rem; }
 
-.stPlotlyChart { background:#FFF; border:1px solid #E6EEF4; border-radius:22px; padding:.5rem .3rem; }
+.stPlotlyChart { background:#FFF; border:1.5px solid #CBDBE7; border-radius:22px; padding:.5rem .3rem; }
 .stRadio label[data-testid], .stSlider label, .stSelectbox label {
   color:#8B98A2 !important; font-size:.7rem !important; letter-spacing:.6px; text-transform:uppercase; font-weight:600; }
 [data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"] { background:#0D0D0D; }
@@ -334,18 +352,28 @@ weeks = pd.to_datetime(A["sat_weeks"])
 LAT, LON = A["sat_lat"], A["sat_lon"]
 
 # ---- persistent header + global controls ------------------------------- #
-st.markdown('<div class="oe-brand"><span class="material-symbols-rounded">sailing</span></div>'
-            '<div class="oe-h1">Reconstructing the Ocean Interior<br>'
-            'from the <span class="hl">Surface</span> Alone</div>', unsafe_allow_html=True)
-
 _MLABEL = {"baseline": "baseline", "oceanembed": "OceanEmbed",
-           "oceanembed_lp05": "λ 0.05", "oceanembed_lp30": "λ 0.30"}
-cbar = st.columns([3, 1.5, 6])
-model = cbar[0].radio("model", models, horizontal=True, key="oe_model",
-                      format_func=lambda m: _MLABEL.get(m, m),
-                      index=models.index("oceanembed") if "oceanembed" in models else 0)
-holdout = cbar[1].radio("holdout", ["spatial", "temporal"], horizontal=True, key="oe_holdout",
-                        help="spatial = Bay of Bengal block · temporal = JJAS 2022")
+           "oceanembed_lp05": "λ .05", "oceanembed_lp30": "λ .30"}
+
+st.markdown(
+    '<div class="oe-topright">'
+    '<a class="ico" href="https://github.com/Specter842/oceanembed/blob/main/RUN.md" '
+    'target="_blank" title="How to run"><span class="material-symbols-rounded">tune</span></a>'
+    '<a class="pill" href="https://github.com/Specter842/oceanembed" target="_blank">'
+    '<span class="material-symbols-rounded">code</span>View source</a></div>'
+    '<div class="oe-brand"><span class="material-symbols-rounded">sailing</span></div>'
+    '<div class="oe-h1">Reconstructing the Ocean Interior<br>'
+    'from the <span class="hl">Surface</span> Alone</div>', unsafe_allow_html=True)
+
+rc = st.columns([2.4, 0.5, 2.0, 0.6, 1.05], vertical_alignment="center")
+rc[1].markdown('<div class="oe-ctllab">model</div>', unsafe_allow_html=True)
+model = rc[2].radio("model", models, horizontal=True, key="oe_model",
+                    format_func=lambda m: _MLABEL.get(m, m), label_visibility="collapsed",
+                    index=models.index("oceanembed") if "oceanembed" in models else 0)
+rc[3].markdown('<div class="oe-ctllab">holdout</div>', unsafe_allow_html=True)
+holdout = rc[4].radio("holdout", ["spatial", "temporal"], horizontal=True,
+                      key="oe_holdout", label_visibility="collapsed",
+                      help="spatial = Bay of Bengal block · temporal = JJAS 2022")
 pred = load_pred(model, holdout)
 if pred is not None:
     lv = pred["depth_levels"]
@@ -384,19 +412,18 @@ if page == "home":
         hb = int(row.depth_level), float(row.rmse_T)
 
     h = st.columns(3)
-    h[0].markdown(kpi_big("", "matched profiles", "8,340", "of ~10,000 target",
+    h[0].markdown(kpi_big("hero", "matched profiles", "8,340", "of ~10,000 target",
                           min(8340 / 10000, 1)), unsafe_allow_html=True)
-    h[1].markdown(kpi_big("lime", "barrier-layer RMSE·T",
-                          f"{rt:.3f}" if rt == rt else "—", "°C   ·   lower is better",
+    h[1].markdown(kpi_big("lime hero", "barrier-layer RMSE·T",
+                          f"{rt:.3f}" if rt == rt else "—", "°C  ·  lower is better",
                           1 - min(rt / 2.0, 1) if rt == rt else 0,
                           badge=f"{rt - rb:+.3f} vs base" if rt == rt and rb == rb else None),
                   unsafe_allow_html=True)
-    _ins = (f'error is not uniform — it peaks at <b>{hb[0]} m</b> '
-            f'(±{hb[1]:.2f} °C in the thermocline) and is near-zero above 30 m and '
-            f'below 500 m. Surface fields carry least information about thermocline depth.'
+    _ins = (f'error peaks at <b>{hb[0]} m</b> (±{hb[1]:.2f} °C, the thermocline); '
+            f'near-zero shallower than 30 m and below 500 m.'
             if hb else 'near-perfect profile shape overall.')
     h[2].markdown(
-        f'<div class="oe-card ink"><div class="lab">profile fit  ·  {holdout} holdout</div>'
+        f'<div class="oe-card ink hero"><div class="lab">profile fit  ·  {holdout} holdout</div>'
         f'<div class="val">{rr:.3f}</div>'
         f'<div class="unit">Pearson r  ·  predicted vs Argo temperature</div>'
         f'<div class="oe-insight">{_ins}</div></div>', unsafe_allow_html=True)
