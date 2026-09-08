@@ -63,7 +63,7 @@ st.markdown("""
 [data-testid="stHeader"] { background:transparent !important; height:0; }
 [data-testid="stMainBlockContainer"] {
   background:#F3F8FC; border-radius:30px; max-width:1440px; position:relative;
-  padding:2rem 2.3rem 3rem 6.2rem !important; margin:1.1rem auto 1.4rem;
+  padding:2rem 2.3rem 3rem 7rem !important; margin:1.1rem auto 1.4rem;
   box-shadow:0 24px 60px -20px rgba(0,0,0,.30); scroll-behavior:smooth;
 }
 html { scroll-behavior:smooth; }
@@ -119,26 +119,20 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .oe-h1 .hl { background:#6FC0F5; border-radius:11px; padding:0 .26rem; box-decoration-break:clone; }
 
 /* ---- pill tab bar (model / holdout / variable only) ---- */
-.st-key-oe_model div[role="radiogroup"], .st-key-oe_holdout div[role="radiogroup"],
-.st-key-oe_var div[role="radiogroup"] { flex-direction:row !important;
-  flex-wrap:wrap; gap:.38rem; align-items:center; }
-.st-key-oe_model div[role="radiogroup"] > label, .st-key-oe_holdout div[role="radiogroup"] > label,
-.st-key-oe_var div[role="radiogroup"] > label { background:#FFF; border:1px solid #DCE7EE;
-  border-radius:999px; padding:.4rem .85rem !important; margin:0 !important; cursor:pointer; }
-.st-key-oe_model div[role="radiogroup"] > label:hover, .st-key-oe_holdout div[role="radiogroup"] > label:hover,
-.st-key-oe_var div[role="radiogroup"] > label:hover { border-color:#0D0D0D; }
-.st-key-oe_model div[role="radiogroup"] > label p, .st-key-oe_holdout div[role="radiogroup"] > label p,
-.st-key-oe_var div[role="radiogroup"] > label p { font-size:.8rem !important;
-  font-weight:500; color:#111 !important; letter-spacing:0 !important; text-transform:none !important; }
-.st-key-oe_model div[role="radiogroup"] > label:has(input:checked),
-.st-key-oe_holdout div[role="radiogroup"] > label:has(input:checked),
-.st-key-oe_var div[role="radiogroup"] > label:has(input:checked) { background:#0D0D0D; border-color:#0D0D0D; }
-.st-key-oe_model div[role="radiogroup"] > label:has(input:checked) p,
-.st-key-oe_holdout div[role="radiogroup"] > label:has(input:checked) p,
-.st-key-oe_var div[role="radiogroup"] > label:has(input:checked) p { color:#F3F8FC !important; }
-.st-key-oe_model div[role="radiogroup"] > label > div:first-child,
-.st-key-oe_holdout div[role="radiogroup"] > label > div:first-child,
-.st-key-oe_var div[role="radiogroup"] > label > div:first-child { display:none !important; }
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) div[role="radiogroup"] { flex-direction:row !important; flex-wrap:wrap;
+  gap:.34rem; align-items:center; }
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"] { background:#FFF; border:1px solid #DCE7EE;
+  border-radius:999px; padding:.32rem .8rem !important; margin:0 !important; cursor:pointer;
+  transition:.12s; }
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"]:hover { border-color:#0D0D0D; }
+/* kill the radio circle: the inner mark and the outer ring live in eqiohyi4/5 */
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"] [class*="eqiohyi4"] { background:none !important;
+  border:none !important; box-shadow:none !important; min-width:0 !important; width:auto !important; }
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"] [class*="eqiohyi5"] { display:none !important; }
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"] p { font-size:.8rem !important; font-weight:500;
+  color:#111 !important; margin:0 !important; white-space:nowrap; }
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"]:has(input:checked) { background:#0D0D0D; border-color:#0D0D0D; }
+:is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"]:has(input:checked) p { color:#F3F8FC !important; }
 
 /* ---- section header ---- */
 .oe-sec { display:flex; align-items:center; gap:.75rem; margin:2.4rem 0 1rem; }
@@ -153,6 +147,7 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 /* ---- cards ---- */
 .oe-card { background:#FFF; border:1px solid #E6EEF4; border-radius:24px; padding:1.15rem 1.3rem; height:100%; }
 .oe-card.lime { background:#6FC0F5; border-color:#6FC0F5; }
+.oe-card.lime .lab, .oe-card.lime .unit { color:rgba(13,13,13,.62) !important; }
 .oe-card.ink  { background:#0D0D0D; border-color:#0D0D0D; }
 .oe-card .lab { font-size:.72rem; font-weight:600; letter-spacing:.6px; text-transform:uppercase; color:#8FA0AB; }
 .oe-card.ink .lab { color:#8A97A1; }
@@ -343,8 +338,11 @@ st.markdown('<div class="oe-brand"><span class="material-symbols-rounded">sailin
             '<div class="oe-h1">Reconstructing the Ocean Interior<br>'
             'from the <span class="hl">Surface</span> Alone</div>', unsafe_allow_html=True)
 
-cbar = st.columns([2.3, 2, 6])
+_MLABEL = {"baseline": "baseline", "oceanembed": "OceanEmbed",
+           "oceanembed_lp05": "λ 0.05", "oceanembed_lp30": "λ 0.30"}
+cbar = st.columns([3, 1.5, 6])
 model = cbar[0].radio("model", models, horizontal=True, key="oe_model",
+                      format_func=lambda m: _MLABEL.get(m, m),
                       index=models.index("oceanembed") if "oceanembed" in models else 0)
 holdout = cbar[1].radio("holdout", ["spatial", "temporal"], horizontal=True, key="oe_holdout",
                         help="spatial = Bay of Bengal block · temporal = JJAS 2022")
