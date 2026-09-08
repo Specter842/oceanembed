@@ -26,58 +26,68 @@ ASSETS = ROOT / "dashboard" / "assets.npz"
 METRICS = ROOT / "outputs" / "metrics"
 
 # ---- palette ------------------------------------------------------------- #
-SAGE = "#9EAC97"
+FOG = "#8E9FA9"          # muted slate backdrop
 CREAM = "#F5F4EF"
 INK = "#0D0D0D"
-LIME = "#DFEA4C"
+AQUA = "#2E90FA"         # ocean-blue accent
 MUTE = "#8B8E86"
 HAIR = "#E4E3DB"
 
 REGIMES = ["well_mixed", "barrier_layer_stratified", "upwelling"]
-RC = {"well_mixed": LIME, "barrier_layer_stratified": INK,
+RC = {"well_mixed": AQUA, "barrier_layer_stratified": INK,
       "upwelling": "#B0A98F", "no data": "#DEDDD4"}
-MC = {"oceanembed": LIME, "baseline": INK,
-      "oceanembed_lp05": "#B7B7AE", "oceanembed_lp30": "#8FA3B8"}
+MC = {"oceanembed": AQUA, "baseline": INK,
+      "oceanembed_lp05": "#9FB6C4", "oceanembed_lp30": "#C4C3BB"}
 
 st.set_page_config(page_title="OceanEmbed", layout="wide", page_icon="🛰️",
                    initial_sidebar_state="expanded")
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap');
+.material-symbols-rounded { font-family:'Material Symbols Rounded'; font-weight:400; font-style:normal;
+  line-height:1; letter-spacing:normal; text-transform:none; display:inline-block; white-space:nowrap;
+  direction:ltr; -webkit-font-feature-settings:'liga'; font-feature-settings:'liga'; }
 
-.stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background:#9EAC97 !important; }
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background:#8E9FA9 !important; }
 [data-testid="stHeader"] { background:transparent !important; height:0; }
 [data-testid="stMainBlockContainer"] {
   background:#F5F4EF; border-radius:30px; max-width:1440px; position:relative;
-  padding:2rem 2.3rem 3rem 5.8rem !important; margin:1.1rem auto 1.4rem;
-  box-shadow:0 24px 60px -20px rgba(0,0,0,.30);
+  padding:2rem 2.3rem 3rem 6.2rem !important; margin:1.1rem auto 1.4rem;
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.30); scroll-behavior:smooth;
 }
+html { scroll-behavior:smooth; }
 html, body, [class*="css"], p, span, div, label, .stMarkdown { font-family:'Inter',system-ui,sans-serif; color:#111; }
 h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 
-/* ---- decorative dark icon rail — fixed, viewport-anchored ---- */
-#oe-rail { position:fixed; left:calc((100vw - min(1440px,100vw))/2 + 1.4rem); top:1.9rem;
-  height:calc(100vh - 3.8rem); width:3.4rem; background:#0D0D0D; border-radius:24px;
-  display:flex; flex-direction:column; align-items:center; padding:.9rem 0; z-index:1000; }
-#oe-rail .logo { width:2.1rem; height:2.1rem; border-radius:12px; background:#DFEA4C;
-  display:flex; align-items:center; justify-content:center; color:#0D0D0D; margin-bottom:1rem; }
-#oe-rail .ic { width:2.1rem; height:2.1rem; margin:.16rem 0; border-radius:11px; display:flex;
-  align-items:center; justify-content:center; font-size:.95rem; color:#7C7C7C; }
-#oe-rail .ic.on { background:#242424; color:#F5F4EF; }
-#oe-rail .sp { flex:1; }
-#oe-rail .av { width:2.1rem; height:2.1rem; border-radius:50%; margin-top:.7rem;
-  background:linear-gradient(135deg,#DFEA4C,#B0A98F); }
+/* ---- fixed dark icon rail — one entry per panel ---- */
+#oe-rail { position:fixed; left:calc((100vw - min(1440px,100vw))/2 + 1.35rem); top:1.9rem;
+  height:calc(100vh - 3.8rem); width:3.9rem; background:#0D0D0D; border-radius:26px;
+  display:flex; flex-direction:column; align-items:center; padding:.85rem 0; z-index:1000; gap:.15rem; }
+#oe-rail a { text-decoration:none; }
+#oe-rail .logo { width:2.7rem; height:2.7rem; border-radius:14px; background:#2E90FA;
+  display:flex; align-items:center; justify-content:center; color:#0D0D0D; margin-bottom:.7rem; }
+#oe-rail .logo .material-symbols-rounded { font-size:26px; }
+#oe-rail .ic { width:2.7rem; height:2.7rem; border-radius:13px; display:flex;
+  align-items:center; justify-content:center; color:#8C8C8C; transition:.13s; }
+#oe-rail .ic .material-symbols-rounded { font-size:24px; }
+#oe-rail .ic:hover { background:#232323; color:#F5F4EF; }
+#oe-rail .ic.on { background:#2E90FA; color:#0D0D0D; }
+#oe-rail .sp { flex:1; min-height:.4rem; }
+#oe-rail .av { width:2.5rem; height:2.5rem; border-radius:50%; margin-top:.55rem;
+  background:linear-gradient(135deg,#2E90FA,#7FB4E8); }
+.oe-anchor { position:relative; top:-1.4rem; visibility:hidden; }
 @media (max-width:1024px){ #oe-rail{ display:none; }
   [data-testid="stMainBlockContainer"]{ padding-left:2.3rem !important; } }
 
 /* ---- display heading ---- */
-.oe-brand { width:2.6rem; height:2.6rem; border-radius:14px; background:#DFEA4C;
-  display:flex; align-items:center; justify-content:center; font-size:1.3rem;
+.oe-brand { width:2.7rem; height:2.7rem; border-radius:14px; background:#2E90FA;
+  display:flex; align-items:center; justify-content:center;
   color:#0D0D0D; margin-bottom:.9rem; }
+.oe-brand .material-symbols-rounded { font-size:24px; }
 .oe-h1 { font-weight:700; font-size:2.9rem; line-height:1.04; letter-spacing:-1.4px;
   color:#0D0D0D; margin:0 0 1.3rem; }
-.oe-h1 .hl { background:#DFEA4C; border-radius:11px; padding:0 .26rem; box-decoration-break:clone; }
+.oe-h1 .hl { background:#2E90FA; border-radius:11px; padding:0 .26rem; box-decoration-break:clone; }
 
 /* ---- pill tab bar ---- */
 [data-testid="stRadio"] div[role="radiogroup"] { flex-direction:row !important;
@@ -92,17 +102,18 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 [data-testid="stRadio"] div[role="radiogroup"] > label > div:first-child { display:none !important; }
 
 /* ---- section header ---- */
-.oe-sec { display:flex; align-items:center; gap:.7rem; margin:2.3rem 0 1rem; }
-.oe-sec .ic { width:2.3rem; height:2.3rem; border-radius:12px; background:#EDECE4;
-  display:flex; align-items:center; justify-content:center; font-size:1rem; }
-.oe-sec .t { font-family:'Space Grotesk',sans-serif; font-size:1.35rem; font-weight:600;
+.oe-sec { display:flex; align-items:center; gap:.75rem; margin:2.4rem 0 1rem; }
+.oe-sec .ic { width:2.5rem; height:2.5rem; border-radius:13px; background:#0D0D0D; color:#F5F4EF;
+  display:flex; align-items:center; justify-content:center; flex:none; }
+.oe-sec .ic .material-symbols-rounded { font-size:22px; }
+.oe-sec .t { font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:600;
   color:#0D0D0D; letter-spacing:-.4px; }
 .oe-sec .h { flex:1; }
 .oe-sec .hint { font-size:.76rem; color:#9A9D96; }
 
 /* ---- cards ---- */
 .oe-card { background:#FFF; border:1px solid #EEEDE6; border-radius:24px; padding:1.15rem 1.3rem; height:100%; }
-.oe-card.lime { background:#DFEA4C; border-color:#DFEA4C; }
+.oe-card.lime { background:#2E90FA; border-color:#2E90FA; }
 .oe-card.ink  { background:#0D0D0D; border-color:#0D0D0D; }
 .oe-card .lab { font-size:.72rem; font-weight:600; letter-spacing:.6px; text-transform:uppercase; color:#9A9D96; }
 .oe-card.ink .lab { color:#9A9A9A; }
@@ -113,13 +124,17 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .oe-card.ink .unit { color:#8A8A8A; }
 .oe-badge { display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem; font-weight:600;
   background:#0D0D0D; color:#F5F4EF; border-radius:999px; padding:.16rem .5rem; }
-.oe-card.ink .oe-badge { background:#DFEA4C; color:#0D0D0D; }
-.oe-dom { display:flex; gap:.28rem; margin-top:.9rem; }
-.oe-dom i { flex:1; height:26px; border-radius:7px; }
+.oe-card.ink .oe-badge { background:#2E90FA; color:#0D0D0D; }
+.oe-dom { display:flex; gap:.34rem; margin-top:1rem; }
+.oe-dom i { flex:1; height:13px; border-radius:4px; }
 .oe-dom i.f { background:#0D0D0D; }
-.oe-card.ink .oe-dom i.f { background:#DFEA4C; }
-.oe-dom i.e { border:1.5px dashed #C9C8BE; }
-.oe-card.ink .oe-dom i.e { border-color:#3A3A3A; }
+.oe-card.lime .oe-dom i.f { background:#0D0D0D; }
+.oe-card.ink .oe-dom i.f { background:#2E90FA; }
+.oe-dom i.e { border:1.5px dashed #C4C3BA; }
+.oe-card.lime .oe-dom i.e { border-color:rgba(0,0,0,.28); }
+.oe-card.ink .oe-dom i.e { border-color:#333; }
+.oe-insight { margin-top:1rem; font-size:.82rem; line-height:1.5; color:#C9C9C9; }
+.oe-insight b { color:#2E90FA; }
 .oe-mini { background:#FFF; border:1px solid #EEEDE6; border-radius:18px; padding:.85rem 1rem; }
 .oe-mini .lab { font-size:.66rem; font-weight:600; letter-spacing:.5px; text-transform:uppercase; color:#9A9D96; }
 .oe-mini .val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.4rem; color:#0D0D0D; margin-top:.15rem; }
@@ -144,8 +159,10 @@ hr { border-color:#E4E3DB; }
 
 
 # ---- helpers ----------------------------------------------------------- #
-def sec(icon, title, hint=""):
-    st.markdown(f'<div class="oe-sec"><div class="ic">{icon}</div>'
+def sec(anchor, icon, title, hint=""):
+    st.markdown(f'<div id="{anchor}" class="oe-anchor"></div>'
+                f'<div class="oe-sec"><div class="ic">'
+                f'<span class="material-symbols-rounded">{icon}</span></div>'
                 f'<div class="t">{title}</div><div class="h"></div>'
                 f'<div class="hint">{hint}</div></div>', unsafe_allow_html=True)
 
@@ -179,7 +196,7 @@ def style_fig(fig, h=270, legend_top=True):
         height=h, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Space Grotesk, Inter, sans-serif", size=11, color="#5C5F58"),
         margin=dict(l=8, r=8, t=10, b=8),
-        colorway=[INK, LIME, "#B0A98F", "#8FA3B8"],
+        colorway=[INK, AQUA, "#B0A98F", "#8FA3B8"],
         legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=10, color="#5C5F58"),
                     orientation="h", y=1.16 if legend_top else -0.22, x=0),
         hoverlabel=dict(bgcolor="#0D0D0D", font_color="#F5F4EF",
@@ -247,13 +264,31 @@ def regime_map(A, month):
     return g, A["regime_grid_lat"], A["regime_grid_lon"]
 
 
-# ---- decorative dark icon rail --------------------------------------- #
+# ---- fixed dark icon rail (one entry per panel) --------------------- #
+def _mi(name):
+    return f'<span class="material-symbols-rounded">{name}</span>'
+
+
+RAIL = [
+    ("s1", "satellite_alt", "Satellite input fields"),
+    ("s2", "waves", "Subsurface reconstruction"),
+    ("s3", "stacked_line_chart", "Skill by depth"),
+    ("s4", "scatter_plot", "Predicted vs observed"),
+    ("s5", "grid_view", "Regime overlay"),
+    ("s6", "compare_arrows", "OceanEmbed vs baseline"),
+    ("s7", "timeline", "Training dynamics"),
+    ("s8", "science", "Physics consistency"),
+]
 st.markdown(
-    '<div id="oe-rail"><div class="logo">✦</div>'
-    '<div class="ic">◵</div><div class="ic">≋</div><div class="ic on">⌘</div>'
-    '<div class="ic">◈</div><div class="ic">⊕</div>'
-    '<div class="sp"></div>'
-    '<div class="ic">◲</div><div class="ic">?</div><div class="av"></div></div>',
+    '<div id="oe-rail">'
+    f'<a class="logo" href="#oe-top" title="Top">{_mi("blur_on")}</a>'
+    + "".join(f'<a class="ic" href="#{a}" title="{t}">{_mi(ic)}</a>' for a, ic, t in RAIL)
+    + '<div class="sp"></div>'
+    f'<a class="ic" href="#s9" title="Data &amp; scope">{_mi("info")}</a>'
+    f'<a class="ic" href="https://github.com/Specter842/oceanembed" target="_blank" '
+    f'title="Repository">{_mi("open_in_new")}</a>'
+    '<div class="av"></div></div>'
+    '<div id="oe-top" class="oe-anchor"></div>',
     unsafe_allow_html=True)
 
 
@@ -266,7 +301,8 @@ models = models_avail()
 weeks = pd.to_datetime(A["sat_weeks"])
 LAT, LON = A["sat_lat"], A["sat_lon"]
 
-st.markdown('<div class="oe-brand">✦</div>'
+st.markdown('<div class="oe-brand"><span class="material-symbols-rounded">'
+            'sailing</span></div>'
             '<div class="oe-h1">Reconstructing the Ocean Interior<br>'
             'from the <span class="hl">Surface</span> Alone</div>',
             unsafe_allow_html=True)
@@ -292,6 +328,21 @@ rb = pooled("baseline", holdout, "barrier_layer_stratified", "rmse_T")
 rr = pooled(model, holdout, "barrier_layer_stratified", "r_T")
 n_ho = len(pred["lat"]) if pred else 0
 
+
+def hardest_band():
+    if metrics is None:
+        return None
+    d = metrics[(metrics.model == model) & (metrics.test_set == holdout)
+                & (metrics.regime_class == "barrier_layer_stratified")
+                & (metrics.depth_level > 0)]
+    if not len(d):
+        return None
+    row = d.loc[d.rmse_T.idxmax()]
+    return int(row.depth_level), float(row.rmse_T)
+
+
+hb = hardest_band()
+
 h = st.columns([1, 1, 1])
 h[0].markdown(kpi_big("", "matched profiles", "8,340", "of ~10,000 target",
                       min(8340 / 10000, 1)), unsafe_allow_html=True)
@@ -300,11 +351,15 @@ h[1].markdown(kpi_big("lime", "barrier-layer RMSE·T",
                       1 - min(rt / 2.0, 1) if rt == rt else 0,
                       badge=f"{rt - rb:+.3f} vs base" if rt == rt and rb == rb else None),
               unsafe_allow_html=True)
+_ins = (f'error is not uniform — it peaks at <b>{hb[0]} m</b> '
+        f'(±{hb[1]:.2f} °C in the thermocline) and is near-zero above 30 m and '
+        f'below 500 m. Surface fields carry least information about thermocline depth.'
+        if hb else 'near-perfect profile shape overall.')
 h[2].markdown(
     f'<div class="oe-card ink"><div class="lab">profile fit  ·  {holdout} holdout</div>'
     f'<div class="val">{rr:.3f}</div>'
     f'<div class="unit">Pearson r  ·  predicted vs Argo temperature</div>'
-    f'{domino(rr if rr == rr else 0)}</div>', unsafe_allow_html=True)
+    f'<div class="oe-insight">{_ins}</div></div>', unsafe_allow_html=True)
 
 m = st.columns(4)
 m[0].markdown(mini("weekly satellite fields", f"{len(weeks)}"), unsafe_allow_html=True)
@@ -314,12 +369,12 @@ m[3].markdown(mini("standard depth levels", "18"), unsafe_allow_html=True)
 
 
 # ---- 1 · satellite input fields ------------------------------------------- #
-sec("🗺", "Satellite input fields", "surface observations — the only model input")
+sec("s1", "satellite_alt", "Satellite input fields", "surface observations — the only model input")
 wk = st.select_slider("week", [d.strftime("%Y-%m-%d") for d in weeks],
                       value=weeks[min(len(weeks) - 1, 86)].strftime("%Y-%m-%d"))
 wi = [d.strftime("%Y-%m-%d") for d in weeks].index(wk)
-sc_sst = [[0, "#F5F4EF"], [.5, "#DFEA4C"], [1, "#0D0D0D"]]
-sc_ssh = [[0, "#0D0D0D"], [.5, "#F5F4EF"], [1, "#DFEA4C"]]
+sc_sst = [[0, "#F5F4EF"], [.5, "#2E90FA"], [1, "#0D0D0D"]]
+sc_ssh = [[0, "#0D0D0D"], [.5, "#F5F4EF"], [1, "#2E90FA"]]
 sc_sss = [[0, "#F5F4EF"], [.5, "#B0A98F"], [1, "#0D0D0D"]]
 g = st.columns(3)
 for col, var, lab, s in zip(g, ("sst", "ssh", "sss"),
@@ -328,7 +383,7 @@ for col, var, lab, s in zip(g, ("sst", "ssh", "sss"),
 
 
 # ---- 2 · subsurface reconstruction ----------------------------------- #
-sec("🌊", "Subsurface reconstruction", "click a float location")
+sec("s2", "waves", "Subsurface reconstruction", "click a float location")
 if pred is None:
     st.warning(f"no predictions for {model}/{holdout} — run `python -m src.evaluate`")
     st.stop()
@@ -373,7 +428,7 @@ with R:
 resid = (P["T_pred"] - P["T_obs"])[mk]
 rt_i = float(np.sqrt(np.mean((P["T_pred"][mk] - P["T_obs"][mk]) ** 2)))
 rs_i = float(np.sqrt(np.mean((P["S_pred"][mk] - P["S_obs"][mk]) ** 2)))
-rf = go.Figure(go.Bar(x=lv[mk], y=resid, marker_color=np.where(resid >= 0, INK, LIME),
+rf = go.Figure(go.Bar(x=lv[mk], y=resid, marker_color=np.where(resid >= 0, INK, AQUA),
                       marker_cornerradius=6))
 rf.update_layout(height=150, xaxis_title="depth m", yaxis_title="T resid °C", bargap=.55)
 c1, c2 = st.columns([3, 1])
@@ -383,7 +438,7 @@ c2.markdown(mini("RMSE·S", f"{rs_i:.2f} PSU"), unsafe_allow_html=True)
 
 
 # ---- 3 · skill by depth --------------------------------------------------- #
-sec("📉", "Skill by depth", f"{holdout} holdout · barrier-layer regime · per level")
+sec("s3", "stacked_line_chart", "Skill by depth", f"{holdout} holdout · barrier-layer regime · per level")
 if metrics is not None:
     d = metrics[(metrics.test_set == holdout) & (metrics.depth_level >= 0)
                 & (metrics.regime_class == "barrier_layer_stratified")
@@ -402,7 +457,7 @@ if metrics is not None:
 
 
 # ---- 4 · predicted vs observed ------------------------------------------ #
-sec("◎", "Predicted vs observed", f"all {len(pts)} holdout profiles · {model}")
+sec("s4", "scatter_plot", "Predicted vs observed", f"all {len(pts)} holdout profiles · {model}")
 gg = st.columns(2)
 for col, pk_, ok_, lab, cc in [(gg[0], "T_pred", "T_obs", "temperature °C", INK),
                                (gg[1], "S_pred", "S_obs", "salinity PSU", "#8FA3B8")]:
@@ -425,7 +480,7 @@ for col, pk_, ok_, lab, cc in [(gg[0], "T_pred", "T_obs", "temperature °C", INK
 
 
 # ---- 5 · regime overlay ------------------------------------------------- #
-sec("▦", "Regime overlay",
+sec("s5", "grid_view", "Regime overlay",
     "class from independent climatology + discharge — never the satellite channels")
 mo = st.slider("month", 1, 12, 8)
 L2, R2 = st.columns([1.4, 1])
@@ -447,7 +502,7 @@ with R2:
     mld = float(np.nanmean(A["clim_mld_m"][mi][np.ix_(my, mx)]))
     strat = float(np.nanmean(A["clim_strat"][mi][np.ix_(my, mx)]))
     f = go.Figure(go.Bar(x=["BLT m", "MLD m", "strat×50"], y=[blt, mld, strat * 50],
-                         marker_color=[INK, "#8FA3B8", LIME], marker_cornerradius=8))
+                         marker_color=[INK, "#8FA3B8", AQUA], marker_cornerradius=8))
     f.update_layout(height=150, yaxis_title="Bay of Bengal mean", bargap=.5)
     st.plotly_chart(style_fig(f, h=150, legend_top=False), use_container_width=True)
     vc = pd.Series(regnames).value_counts().reindex(REGIMES, fill_value=0)
@@ -458,7 +513,7 @@ with R2:
 
 
 # ---- 6 · OceanEmbed vs baseline --------------------------------------- #
-sec("◧", "OceanEmbed vs baseline", "per-regime RMSE, pooled over depth")
+sec("s6", "compare_arrows", "OceanEmbed vs baseline", "per-regime RMSE, pooled over depth")
 if metrics is not None:
     var = st.radio("variable", ["rmse_T", "rmse_S"], horizontal=True,
                    format_func=lambda s: "Temperature" if s.endswith("T") else "Salinity")
@@ -479,7 +534,7 @@ if metrics is not None:
 
 
 # ---- 7 · training dynamics ------------------------------------------- #
-sec("⟿", "Training dynamics", "validation RMSE per epoch")
+sec("s7", "timeline", "Training dynamics", "validation RMSE per epoch")
 if logs:
     gg = st.columns(2)
     for col, yv, lab in zip(gg, ("rmseT", "rmseS"), ("val RMSE T °C", "val RMSE S PSU")):
@@ -493,10 +548,10 @@ if logs:
 
 
 # ---- 8 · physics consistency ----------------------------------------- #
-sec("⚖", "Physics consistency", "TEOS-10 density-inversion fraction · lower is better")
+sec("s8", "science", "Physics consistency", "TEOS-10 density-inversion fraction · lower is better")
 if phys is not None:
     f = go.Figure()
-    for ts, cc in [("spatial", INK), ("temporal", LIME)]:
+    for ts, cc in [("spatial", INK), ("temporal", AQUA)]:
         s = phys[phys.test_set == ts]
         f.add_trace(go.Bar(name=ts, x=s.model, y=s.inversion_fraction * 100,
                            marker_color=cc, marker_cornerradius=10))
@@ -507,9 +562,9 @@ if phys is not None:
 
 
 # ---- 9 · data & scope ----------------------------------------------- #
-sec("ⓘ", "Data & scope")
+sec("s9", "info", "Data & scope")
 st.markdown(
-    '<div class="oe-card" style="border-radius:20px;border-left:3px solid #DFEA4C;'
+    '<div class="oe-card" style="border-radius:20px;border-left:3px solid #2E90FA;'
     'background:#FCFCF9">'
     'This demo runs on <b>historical downloaded satellite and Argo data</b>. Real-time '
     'ingestion and the float-deployment / cyclone-flagging features in the roadmap are '
