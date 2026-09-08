@@ -42,12 +42,22 @@ MC = {"oceanembed": AQUA, "baseline": INK,
 st.set_page_config(page_title="OceanEmbed", layout="wide", page_icon="🛰️",
                    initial_sidebar_state="expanded")
 
+st.markdown(
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
+    'family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">'
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
+    'family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">',
+    unsafe_allow_html=True)
+
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap');
-.material-symbols-rounded { font-family:'Material Symbols Rounded'; font-weight:400; font-style:normal;
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+.material-symbols-rounded { font-family:'Material Symbols Rounded'; font-weight:normal; font-style:normal;
   line-height:1; letter-spacing:normal; text-transform:none; display:inline-block; white-space:nowrap;
-  direction:ltr; -webkit-font-feature-settings:'liga'; font-feature-settings:'liga'; }
+  word-wrap:normal; direction:ltr; -webkit-font-feature-settings:'liga'; -webkit-font-smoothing:antialiased;
+  font-feature-settings:'liga'; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
 
 .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background:#A7C4D6 !important; }
 [data-testid="stHeader"] { background:transparent !important; height:0; }
@@ -60,25 +70,44 @@ html { scroll-behavior:smooth; }
 html, body, [class*="css"], p, span, div, label, .stMarkdown { font-family:'Inter',system-ui,sans-serif; color:#111; }
 h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 
-/* ---- fixed dark icon rail — one entry per panel ---- */
-#oe-rail { position:fixed; left:calc((100vw - min(1440px,100vw))/2 + 1.35rem); top:1.9rem;
-  height:calc(100vh - 3.8rem); width:3.9rem; background:#0D0D0D; border-radius:26px;
-  display:flex; flex-direction:column; align-items:center; padding:.85rem 0; z-index:1000; gap:.15rem; }
-#oe-rail a { text-decoration:none; }
-#oe-rail .logo { width:2.7rem; height:2.7rem; border-radius:14px; background:#6FC0F5;
-  display:flex; align-items:center; justify-content:center; color:#0D0D0D; margin-bottom:.7rem; }
-#oe-rail .logo .material-symbols-rounded { font-size:26px; }
-#oe-rail .ic { width:2.7rem; height:2.7rem; border-radius:13px; display:flex;
-  align-items:center; justify-content:center; color:#8C8C8C; transition:.13s; }
-#oe-rail .ic .material-symbols-rounded { font-size:24px; }
-#oe-rail .ic:hover { background:#232323; color:#F3F8FC; }
-#oe-rail .ic.on { background:#6FC0F5; color:#0D0D0D; }
-#oe-rail .sp { flex:1; min-height:.4rem; }
-#oe-rail .av { width:2.5rem; height:2.5rem; border-radius:50%; margin-top:.55rem;
-  background:linear-gradient(135deg,#6FC0F5,#BFE0F6); }
-.oe-anchor { position:relative; top:-1.4rem; visibility:hidden; }
-@media (max-width:1024px){ #oe-rail{ display:none; }
-  [data-testid="stMainBlockContainer"]{ padding-left:2.3rem !important; } }
+/* ---- fixed dark icon rail (keyed nav radio, pinned left; icons via ::before) ---- */
+[data-testid="stSidebar"] { display:none !important; }
+[data-testid="stApp"] .st-key-oe_nav {
+  position:fixed !important; z-index:999 !important;
+  inset:1.7rem auto auto max(1.3rem, calc((100vw - 1440px)/2 + 1.3rem)) !important;
+  width:3.7rem !important; min-width:3.7rem !important; max-width:3.7rem !important;
+  background:#0D0D0D !important; border-radius:24px !important; padding:1rem .55rem !important;
+  margin:0 !important; }
+.st-key-oe_nav::before { content:"blur_on"; font-family:'Material Symbols Rounded';
+  -webkit-font-feature-settings:'liga'; font-feature-settings:'liga';
+  display:flex; align-items:center; justify-content:center; width:2.6rem; height:2.6rem;
+  margin:0 auto .8rem; border-radius:13px; background:#6FC0F5; color:#FFF; font-size:22px; }
+.st-key-oe_nav [data-testid="stWidgetLabel"], .st-key-oe_nav [data-testid="stCaptionContainer"] { display:none !important; }
+.st-key-oe_nav div[role="radiogroup"] { flex-direction:column !important; gap:.18rem; align-items:center; }
+.st-key-oe_nav div[role="radiogroup"] > label { width:2.6rem; height:2.6rem; min-height:0;
+  padding:0 !important; margin:0 !important; border-radius:12px; background:transparent;
+  border:none; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:.12s; overflow:hidden; }
+.st-key-oe_nav div[role="radiogroup"] > label:hover { background:#242424; }
+.st-key-oe_nav div[role="radiogroup"] > label > div { display:none !important; }
+.st-key-oe_nav div[role="radiogroup"] > label::before { font-family:'Material Symbols Rounded';
+  -webkit-font-feature-settings:'liga'; font-feature-settings:'liga'; color:#EDEDED; font-size:22px; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(1)::before { content:"dashboard"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(2)::before { content:"satellite_alt"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(3)::before { content:"water"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(4)::before { content:"stacked_line_chart"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(5)::before { content:"scatter_plot"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(6)::before { content:"grid_view"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(7)::before { content:"balance"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(8)::before { content:"timeline"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(9)::before { content:"science"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(10)::before { content:"info"; }
+.st-key-oe_nav div[role="radiogroup"] > label:has(input:checked) { background:#6FC0F5; }
+.st-key-oe_nav div[role="radiogroup"] > label:has(input:checked)::before { color:#0D0D0D; }
+@media (max-width:1100px){ .st-key-oe_nav{ position:static !important; width:auto !important;
+    flex-direction:row; padding:.5rem; }
+  .st-key-oe_nav div[role="radiogroup"]{ flex-direction:row !important; flex-wrap:wrap; }
+  .st-key-oe_nav::before{ display:none; } }
 
 /* ---- display heading ---- */
 .oe-brand { width:2.7rem; height:2.7rem; border-radius:14px; background:#6FC0F5;
@@ -89,17 +118,27 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   color:#0D0D0D; margin:0 0 1.3rem; }
 .oe-h1 .hl { background:#6FC0F5; border-radius:11px; padding:0 .26rem; box-decoration-break:clone; }
 
-/* ---- pill tab bar ---- */
-[data-testid="stRadio"] div[role="radiogroup"] { flex-direction:row !important;
+/* ---- pill tab bar (model / holdout / variable only) ---- */
+.st-key-oe_model div[role="radiogroup"], .st-key-oe_holdout div[role="radiogroup"],
+.st-key-oe_var div[role="radiogroup"] { flex-direction:row !important;
   flex-wrap:wrap; gap:.38rem; align-items:center; }
-[data-testid="stRadio"] div[role="radiogroup"] > label { background:#FFF; border:1px solid #DCE7EE;
+.st-key-oe_model div[role="radiogroup"] > label, .st-key-oe_holdout div[role="radiogroup"] > label,
+.st-key-oe_var div[role="radiogroup"] > label { background:#FFF; border:1px solid #DCE7EE;
   border-radius:999px; padding:.4rem .85rem !important; margin:0 !important; cursor:pointer; }
-[data-testid="stRadio"] div[role="radiogroup"] > label:hover { border-color:#0D0D0D; }
-[data-testid="stRadio"] div[role="radiogroup"] > label p { font-size:.8rem !important;
+.st-key-oe_model div[role="radiogroup"] > label:hover, .st-key-oe_holdout div[role="radiogroup"] > label:hover,
+.st-key-oe_var div[role="radiogroup"] > label:hover { border-color:#0D0D0D; }
+.st-key-oe_model div[role="radiogroup"] > label p, .st-key-oe_holdout div[role="radiogroup"] > label p,
+.st-key-oe_var div[role="radiogroup"] > label p { font-size:.8rem !important;
   font-weight:500; color:#111 !important; letter-spacing:0 !important; text-transform:none !important; }
-[data-testid="stRadio"] div[role="radiogroup"] > label:has(input:checked) { background:#0D0D0D; border-color:#0D0D0D; }
-[data-testid="stRadio"] div[role="radiogroup"] > label:has(input:checked) p { color:#F3F8FC !important; }
-[data-testid="stRadio"] div[role="radiogroup"] > label > div:first-child { display:none !important; }
+.st-key-oe_model div[role="radiogroup"] > label:has(input:checked),
+.st-key-oe_holdout div[role="radiogroup"] > label:has(input:checked),
+.st-key-oe_var div[role="radiogroup"] > label:has(input:checked) { background:#0D0D0D; border-color:#0D0D0D; }
+.st-key-oe_model div[role="radiogroup"] > label:has(input:checked) p,
+.st-key-oe_holdout div[role="radiogroup"] > label:has(input:checked) p,
+.st-key-oe_var div[role="radiogroup"] > label:has(input:checked) p { color:#F3F8FC !important; }
+.st-key-oe_model div[role="radiogroup"] > label > div:first-child,
+.st-key-oe_holdout div[role="radiogroup"] > label > div:first-child,
+.st-key-oe_var div[role="radiogroup"] > label > div:first-child { display:none !important; }
 
 /* ---- section header ---- */
 .oe-sec { display:flex; align-items:center; gap:.75rem; margin:2.4rem 0 1rem; }
@@ -268,11 +307,7 @@ def regime_map(A, month):
     return g, A["regime_grid_lat"], A["regime_grid_lon"]
 
 
-# ---- fixed dark icon rail (one entry per panel) --------------------- #
-def _mi(name):
-    return f'<span class="material-symbols-rounded">{name}</span>'
-
-
+# ---- navigation rail = the sidebar (in-place, no URL change) --------- #
 PAGES = [
     ("home", "dashboard", "Overview"),
     ("s1", "satellite_alt", "Satellite input fields"),
@@ -285,28 +320,13 @@ PAGES = [
     ("s8", "science", "Physics consistency"),
     ("s9", "info", "Data & scope"),
 ]
-_PIDS = {p for p, _, _ in PAGES}
-page = st.query_params.get("p", "home")
-if page not in _PIDS:
-    page = "home"
+_ICON = {p: i for p, i, _ in PAGES}
+_TITLE = {p: t for p, _, t in PAGES}
 
-
-def rail_link(pid, icon, title):
-    cls = "ic on" if pid == page else "ic"
-    return f'<a class="{cls}" href="?p={pid}" title="{title}">{_mi(icon)}</a>'
-
-
-logo_cls = "logo on" if page == "home" else "logo"
-st.markdown(
-    '<div id="oe-rail">'
-    f'<a class="{logo_cls}" href="?p=home" title="Overview">{_mi("blur_on")}</a>'
-    + "".join(rail_link(p, i, t) for p, i, t in PAGES[1:9])
-    + '<div class="sp"></div>'
-    + rail_link("s9", "info", "Data & scope")
-    + '<a class="ic" href="https://github.com/Specter842/oceanembed" target="_blank" '
-    f'title="Repository">{_mi("open_in_new")}</a>'
-    '<div class="av"></div></div>',
-    unsafe_allow_html=True)
+page = st.radio("Section", [p for p, _, _ in PAGES],
+                format_func=lambda p: _TITLE[p],
+                label_visibility="collapsed", key="oe_nav",
+                help="navigate — each panel is its own view")
 
 
 # ---- data ---------------------------------------------------------------- #
@@ -324,9 +344,9 @@ st.markdown('<div class="oe-brand"><span class="material-symbols-rounded">sailin
             'from the <span class="hl">Surface</span> Alone</div>', unsafe_allow_html=True)
 
 cbar = st.columns([2.3, 2, 6])
-model = cbar[0].radio("model", models, horizontal=True,
+model = cbar[0].radio("model", models, horizontal=True, key="oe_model",
                       index=models.index("oceanembed") if "oceanembed" in models else 0)
-holdout = cbar[1].radio("holdout", ["spatial", "temporal"], horizontal=True,
+holdout = cbar[1].radio("holdout", ["spatial", "temporal"], horizontal=True, key="oe_holdout",
                         help="spatial = Bay of Bengal block · temporal = JJAS 2022")
 pred = load_pred(model, holdout)
 if pred is not None:
@@ -389,15 +409,78 @@ if page == "home":
     m[2].markdown(mini(f"{holdout} holdout · n", f"{n_ho}"), unsafe_allow_html=True)
     m[3].markdown(mini("standard depth levels", "18"), unsafe_allow_html=True)
 
-    sec("home", "explore", "The panels",
-        "pick one from the rail — every icon is its own page")
-    nav = st.columns(4)
-    for i, (pid, icon, title) in enumerate(PAGES[1:9]):
-        nav[i % 4].markdown(
-            f'<a href="?p={pid}" style="text-decoration:none"><div class="oe-link">'
-            f'<div class="ic"><span class="material-symbols-rounded">{icon}</span></div>'
-            f'<div><div class="tt">{title}</div></div><div class="ar">→</div></div></a>',
-            unsafe_allow_html=True)
+    sec("home", "monitoring", "At a glance",
+        f"{model} · {holdout} holdout — open any panel from the rail for detail")
+    ov = st.columns(2)
+
+    # OceanEmbed vs baseline (pooled RMSE_T by regime, both holdouts)
+    if metrics is not None:
+        pool = metrics[(metrics.depth_level == -1)
+                       & metrics.model.isin(["baseline", "oceanembed"])
+                       & metrics.regime_class.isin(REGIMES)]
+        f = px.bar(pool, x="regime_class", y="rmse_T", color="model", barmode="group",
+                   facet_col="test_set", color_discrete_map=MC)
+        f.update_traces(marker_cornerradius=12)
+        f.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1].upper(),
+                                                 font=dict(size=9, color="#8FA0AB")))
+        f.update_layout(height=280)
+        ov[0].markdown('<div class="oe-mini" style="margin-bottom:.4rem">'
+                       '<div class="lab">OceanEmbed vs baseline · RMSE·T by regime</div></div>',
+                       unsafe_allow_html=True)
+        ov[0].plotly_chart(style_fig(f, h=280), use_container_width=True)
+
+    # skill by depth — RMSE_T, barrier-layer, current holdout
+    if metrics is not None:
+        d3 = metrics[(metrics.test_set == holdout) & (metrics.depth_level >= 0)
+                     & (metrics.regime_class == "barrier_layer_stratified")
+                     & metrics.model.isin(["baseline", model])]
+        f = go.Figure()
+        for mdl in ["baseline", model]:
+            s = d3[d3.model == mdl].sort_values("depth_level")
+            f.add_trace(go.Scatter(x=s.rmse_T, y=s.depth_level, name=mdl,
+                                   line=dict(color=MC.get(mdl, INK), width=2.5),
+                                   mode="lines+markers", marker=dict(size=4)))
+        f.update_layout(height=280, xaxis_title="RMSE T °C",
+                        yaxis=dict(title="depth m", autorange="reversed"))
+        ov[1].markdown('<div class="oe-mini" style="margin-bottom:.4rem">'
+                       '<div class="lab">error vs depth · barrier-layer regime</div></div>',
+                       unsafe_allow_html=True)
+        ov[1].plotly_chart(style_fig(f, h=280), use_container_width=True)
+
+    ov2 = st.columns(2)
+    # predicted vs observed T
+    if pred is not None:
+        mm = pred["mask"] > 0
+        pv, ov_ = pred["T_pred"][mm], pred["T_obs"][mm]
+        r = float(np.corrcoef(pv, ov_)[0, 1])
+        f = go.Figure()
+        f.add_trace(go.Histogram2dContour(x=ov_, y=pv, colorscale=[[0, "#F3F8FC"], [1, INK]],
+                                          showscale=False, ncontours=12, line=dict(width=0)))
+        lim = [min(pv.min(), ov_.min()), max(pv.max(), ov_.max())]
+        f.add_trace(go.Scatter(x=lim, y=lim, line=dict(color="#AAB7C0", dash="dash", width=1),
+                               showlegend=False, hoverinfo="skip"))
+        f.update_layout(height=270, xaxis_title="observed T °C", yaxis_title="predicted T °C",
+                        annotations=[dict(x=.05, y=.92, xref="paper", yref="paper",
+                                          text=f"r = {r:.3f}", showarrow=False,
+                                          font=dict(color="#0D0D0D", size=13,
+                                                    family="Space Grotesk"))])
+        ov2[0].markdown('<div class="oe-mini" style="margin-bottom:.4rem">'
+                        '<div class="lab">predicted vs observed temperature</div></div>',
+                        unsafe_allow_html=True)
+        ov2[0].plotly_chart(style_fig(f, h=270, legend_top=False), use_container_width=True)
+
+    # training curves — val RMSE_T
+    if logs:
+        f = go.Figure()
+        for name, dfl in logs.items():
+            v = dfl[dfl.split == "val"]
+            f.add_trace(go.Scatter(x=v.epoch, y=v.rmseT, name=name,
+                                   line=dict(color=MC.get(name, "#AAB7C0"), width=2)))
+        f.update_layout(height=270, xaxis_title="epoch", yaxis_title="val RMSE T °C")
+        ov2[1].markdown('<div class="oe-mini" style="margin-bottom:.4rem">'
+                        '<div class="lab">training — validation RMSE·T per epoch</div></div>',
+                        unsafe_allow_html=True)
+        ov2[1].plotly_chart(style_fig(f, h=270), use_container_width=True)
 
 
 # ---- 1 · satellite input fields --------------------------------------- #
@@ -554,7 +637,7 @@ elif page == "s5":
 elif page == "s6":
     sec("s6", "compare_arrows", "OceanEmbed vs baseline", "per-regime RMSE, pooled over depth")
     if metrics is not None:
-        var = st.radio("variable", ["rmse_T", "rmse_S"], horizontal=True,
+        var = st.radio("variable", ["rmse_T", "rmse_S"], horizontal=True, key="oe_var",
                        format_func=lambda s: "Temperature" if s.endswith("T") else "Salinity")
         pool = metrics[metrics.depth_level == -1]
         keep = [m_ for m_ in ["baseline", "oceanembed", model] if m_ in pool.model.unique()]
