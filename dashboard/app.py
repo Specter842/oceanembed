@@ -62,7 +62,7 @@ st.markdown("""
 .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background:#A7C4D6 !important; }
 [data-testid="stHeader"] { background:transparent !important; height:0; }
 [data-testid="stMainBlockContainer"] {
-  background:#F3F8FC; border-radius:30px; max-width:1440px; position:relative;
+  background:#E4EEF5; border-radius:30px; max-width:1440px; position:relative;
   padding:2rem 2.3rem 3rem 7rem !important; margin:1.1rem auto 1.4rem;
   box-shadow:0 24px 60px -20px rgba(0,0,0,.30); scroll-behavior:smooth;
 }
@@ -74,7 +74,9 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 [data-testid="stSidebar"] { display:none !important; }
 [data-testid="stApp"] .st-key-oe_nav {
   position:fixed !important; z-index:999 !important;
-  inset:1.7rem auto auto max(1.3rem, calc((100vw - 1440px)/2 + 1.3rem)) !important;
+  top:50% !important; bottom:auto !important; right:auto !important;
+  left:max(1.1rem, calc((100vw - 1440px)/2 + 1.1rem)) !important;
+  transform:translateY(-50%) !important;
   width:3.7rem !important; min-width:3.7rem !important; max-width:3.7rem !important;
   background:#0D0D0D !important; border-radius:24px !important; padding:1rem .55rem !important;
   margin:0 !important; }
@@ -84,14 +86,26 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   margin:0 auto .8rem; border-radius:13px; background:#6FC0F5; color:#FFF; font-size:22px; }
 .st-key-oe_nav [data-testid="stWidgetLabel"], .st-key-oe_nav [data-testid="stCaptionContainer"] { display:none !important; }
 .st-key-oe_nav div[role="radiogroup"] { flex-direction:column !important; gap:.18rem; align-items:center; }
-.st-key-oe_nav div[role="radiogroup"] > label { width:2.6rem; height:2.6rem; min-height:0;
+.st-key-oe_nav div[role="radiogroup"] > label { position:relative; width:2.6rem; height:2.6rem; min-height:0;
   padding:0 !important; margin:0 !important; border-radius:12px; background:transparent;
   border:none; display:flex; align-items:center; justify-content:center; cursor:pointer;
-  transition:.12s; overflow:hidden; }
+  transition:.12s; overflow:hidden; flex:none !important; }
 .st-key-oe_nav div[role="radiogroup"] > label:hover { background:#242424; }
-.st-key-oe_nav div[role="radiogroup"] > label > div { display:none !important; }
-.st-key-oe_nav div[role="radiogroup"] > label::before { font-family:'Material Symbols Rounded';
-  -webkit-font-feature-settings:'liga'; font-feature-settings:'liga'; color:#EDEDED; font-size:22px; }
+/* the native radio circle (eqiohyi4) is the active indicator: Streamlit paints it
+   #6FC0F5 when checked, rgba(13,13,13,.2) (invisible on the #0D0D0D rail) otherwise.
+   Blow it up to fill the cell — no :has()/nth-of-type, so it never lags on rerun. */
+.st-key-oe_nav div[role="radiogroup"] > label > div { position:absolute !important; inset:0 !important;
+  display:block !important; padding:0 !important; margin:0 !important; }
+.st-key-oe_nav div[role="radiogroup"] [class*="eqiohyi3"] { position:absolute !important; inset:0 !important;
+  gap:0 !important; padding:0 !important; margin:0 !important; }
+.st-key-oe_nav div[role="radiogroup"] [class*="eqiohyi4"] { position:absolute !important; inset:0 !important;
+  width:auto !important; height:auto !important; min-width:0 !important; min-height:0 !important;
+  border:none !important; border-radius:12px !important; transition:background .12s; }
+.st-key-oe_nav div[role="radiogroup"] [class*="eqiohyi5"] { display:none !important; }
+.st-key-oe_nav div[role="radiogroup"] label [data-testid="stMarkdownContainer"] { display:none !important; }
+.st-key-oe_nav div[role="radiogroup"] > label::before { position:relative; z-index:2;
+  font-family:'Material Symbols Rounded';
+  -webkit-font-feature-settings:'liga'; font-feature-settings:'liga'; color:#FFFFFF; font-size:22px; }
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(1)::before { content:"dashboard"; }
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(2)::before { content:"satellite_alt"; }
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(3)::before { content:"water"; }
@@ -102,9 +116,8 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(8)::before { content:"timeline"; }
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(9)::before { content:"science"; }
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(10)::before { content:"info"; }
-.st-key-oe_nav div[role="radiogroup"] > label:has(input:checked) { background:#6FC0F5; }
-.st-key-oe_nav div[role="radiogroup"] > label:has(input:checked)::before { color:#0D0D0D; }
 @media (max-width:1100px){ .st-key-oe_nav{ position:static !important; width:auto !important;
+    max-width:none !important; transform:none !important; max-height:none !important;
     flex-direction:row; padding:.5rem; }
   .st-key-oe_nav div[role="radiogroup"]{ flex-direction:row !important; flex-wrap:wrap; }
   .st-key-oe_nav::before{ display:none; } }
@@ -159,10 +172,11 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .oe-sec .hint { font-size:.76rem; color:#8FA0AB; }
 
 /* ---- cards ---- */
-[data-testid="stHorizontalBlock"] { align-items:stretch; gap:.9rem; }
+[data-testid="stHorizontalBlock"] { align-items:stretch; gap:1.15rem !important; }
 [data-testid="stColumn"] > div[data-testid="stVerticalBlock"] { height:100%; }
-.oe-card { background:#FFF; border:1.5px solid #CBDBE7; border-radius:24px;
-  padding:1.15rem 1.3rem; height:100%; }
+.oe-card { background:#FFF; border:1.5px solid #C1D5E3; border-radius:24px;
+  padding:1.15rem 1.3rem; height:100%;
+  box-shadow:0 6px 18px -8px rgba(20,52,82,.22); }
 .oe-card.hero { min-height:12.5rem; display:flex; flex-direction:column; }
 .oe-card.lime { background:#6FC0F5; border-color:#3E9AD6; }
 .oe-card.lime .lab, .oe-card.lime .unit { color:rgba(13,13,13,.64) !important; }
@@ -187,17 +201,20 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .oe-card.ink .oe-dom i.e { border-color:#333; }
 .oe-insight { margin-top:auto; padding-top:.9rem; font-size:.8rem; line-height:1.45; color:#AFC0CC; }
 .oe-insight b { color:#6FC0F5; }
-.oe-mini { background:#FFF; border:1.5px solid #CBDBE7; border-radius:18px; padding:.85rem 1rem; height:100%; }
+.oe-mini { background:#FFF; border:1.5px solid #C1D5E3; border-radius:18px; padding:.85rem 1rem; height:100%;
+  box-shadow:0 5px 14px -7px rgba(20,52,82,.20); }
 .oe-mini .lab { font-size:.66rem; font-weight:600; letter-spacing:.5px; text-transform:uppercase; color:#8FA0AB; }
 .oe-mini .val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.4rem; color:#0D0D0D; margin-top:.15rem; }
 
-.stPlotlyChart { background:#FFF; border:1.5px solid #CBDBE7; border-radius:22px; padding:.5rem .3rem; }
+.stPlotlyChart { background:#FFF; border:1.5px solid #C1D5E3; border-radius:22px; padding:.5rem .3rem;
+  box-shadow:0 6px 18px -8px rgba(20,52,82,.20); }
 .stRadio label[data-testid], .stSlider label, .stSelectbox label {
   color:#8B98A2 !important; font-size:.7rem !important; letter-spacing:.6px; text-transform:uppercase; font-weight:600; }
 [data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"] { background:#0D0D0D; }
 hr { border-color:#DCE7EE; }
-.oe-link { background:#FFF; border:1px solid #E6EEF4; border-radius:18px; padding:.95rem 1.05rem;
-  display:flex; gap:.75rem; align-items:center; height:100%; margin-bottom:.55rem; transition:.13s; }
+.oe-link { background:#FFF; border:1.5px solid #C1D5E3; border-radius:18px; padding:.95rem 1.05rem;
+  display:flex; gap:.75rem; align-items:center; height:100%; margin-bottom:.55rem; transition:.13s;
+  box-shadow:0 5px 14px -7px rgba(20,52,82,.18); }
 .oe-link:hover { border-color:#0D0D0D; }
 .oe-link .ic { width:2.2rem; height:2.2rem; border-radius:11px; background:#0D0D0D; color:#F3F8FC;
   display:flex; align-items:center; justify-content:center; flex:none; }
@@ -206,7 +223,8 @@ hr { border-color:#DCE7EE; }
 .oe-link .ds { font-size:.74rem; color:#8FA0AB; margin-top:.15rem; line-height:1.4; }
 .oe-link .ar { margin-left:auto; color:#AAB7C0; flex:none; display:flex; }
 .oe-link .ar .material-symbols-rounded { font-size:18px; }
-[data-testid="stExpander"] { border:1px solid #E6EEF4; border-radius:16px; background:#FFF; }
+[data-testid="stExpander"] { border:1.5px solid #C1D5E3; border-radius:16px; background:#FFF;
+  box-shadow:0 5px 14px -7px rgba(20,52,82,.18); }
 [data-testid="stExpander"] summary { font-size:.8rem; }
 [data-testid="stDataFrame"] { border-radius:12px; }
 </style>

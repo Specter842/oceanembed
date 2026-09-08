@@ -1,7 +1,7 @@
 # OceanEmbed dashboard — light ocean-blue theme
 [theme]
 base = "light"
-backgroundColor = "#F3F8FC"
+backgroundColor = "#E4EEF5"
 secondaryBackgroundColor = "#FFFFFF"
 primaryColor = "#6FC0F5"
 textColor = "#0D0D0D"
