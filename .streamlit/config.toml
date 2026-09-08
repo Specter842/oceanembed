@@ -1,11 +1,11 @@
-# OceanEmbed dashboard — pure-black theme
+# OceanEmbed dashboard — light / lime theme
 [theme]
-base = "dark"
-backgroundColor = "#000000"
-secondaryBackgroundColor = "#0A0A0A"
-primaryColor = "#22D3EE"
-textColor = "#F2F2F2"
-font = "monospace"
+base = "light"
+backgroundColor = "#F5F4EF"
+secondaryBackgroundColor = "#FFFFFF"
+primaryColor = "#0D0D0D"
+textColor = "#111111"
+font = "sans serif"
 
 [client]
 toolbarMode = "minimal"
