@@ -114,6 +114,16 @@ the real numbers. **Do not tune to make OceanEmbed win the barrier-layer regime*
 
 ## 5. Dashboard  (Phase 4)
 
+Pure-black Streamlit dashboard, 9 sections. It reads a baked numpy bundle
+(`dashboard/assets.npz`) plus the `outputs/metrics/` CSV/NPZ files — **no torch,
+netCDF4, xarray or gsw at runtime**, so it starts fast and runs anywhere.
+
 ```bash
-streamlit run dashboard/app.py
+python -m dashboard.prep_assets        # once, after the pipeline — bakes assets.npz (~7 MB)
+python -m streamlit run dashboard/app.py --client.toolbarMode minimal
 ```
+
+`assets.npz` is committed, so a fresh clone can run the dashboard straight away;
+re-run `prep_assets` only if the satellite stack or the regime climatology change.
+After a new training run, re-run `python -m src.evaluate` so the comparison and
+skill panels pick up the new checkpoints.

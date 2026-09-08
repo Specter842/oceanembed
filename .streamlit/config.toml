@@ -1,0 +1,15 @@
+# OceanEmbed dashboard — pure-black theme
+[theme]
+base = "dark"
+backgroundColor = "#000000"
+secondaryBackgroundColor = "#0A0A0A"
+primaryColor = "#22D3EE"
+textColor = "#F2F2F2"
+font = "monospace"
+
+[client]
+toolbarMode = "minimal"
+showSidebarNavigation = false
+
+[ui]
+hideTopBar = true
