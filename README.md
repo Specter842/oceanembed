@@ -120,6 +120,15 @@ Salinity RMSE and Pearson r are within noise between the two models everywhere
 (profile-shape r ≈ 0.99 for both). Full per-depth table:
 `outputs/metrics/per_regime_rmse.csv`.
 
+**Uncertainty is calibrated on real held-out Argo.** Using the model's predicted
+variance, an 80 % temperature interval covers **81 %** of Bay-of-Bengal Argo
+observations (82 % in the barrier-layer regime), a 95 % interval covers **95 %**,
+mean calibration error ≈ **1 pt**. On the temporal (monsoon) holdout the
+temperature intervals are mildly over-confident (80 % nominal → 76 % actual,
+≈ 2.6 pt); salinity calibrates ≈ 2–3 pt. OceanEmbed and the baseline calibrate
+near-identically. Regenerated into `outputs/metrics/calibration.csv` by
+`python -m src.evaluate`.
+
 ### Honest read (CLAUDE.md §6.2)
 
 **On the primary test — the Bay of Bengal, barrier-layer regime — OceanEmbed does
@@ -192,7 +201,7 @@ src/regime/        build_climatology (WOA23 -> MLD/BLT/strat), regime_labels
 src/models/        backbone, conditioning (FiLM), physics_loss (EOS-80), oceanembed_model
 src/               data_pipeline (matching + holdouts), datasets, train, evaluate, config
 src/viz/           plots
-dashboard/app.py   Streamlit demo (5 sections; reads pre-computed artefacts, no torch)
+dashboard/app.py   Streamlit demo (6 views; reads pre-computed artefacts, no torch)
 data/raw/phase0_report.md      data reality check
 outputs/metrics/PHASE3_FINDINGS.md   results analysis
 ```

@@ -113,6 +113,27 @@ specifically", which is fully supported.
 
 ---
 
+## §3.3 / §5 — add the calibrated-uncertainty result (new, supported by the build)
+
+Phase 3 added interval-calibration reporting (`outputs/metrics/calibration.csv`).
+This is a real, defensible strength and worth one sentence in the abstract —
+stated plainly, not oversold.
+
+**Add to Methodology (§3.3) or Results (§3.4):**
+> The model predicts a per-level variance (Gaussian NLL training objective), and
+> this uncertainty is empirically calibrated on the held-out data: an 80 %
+> predicted-interval contains ~81 % of withheld Bay-of-Bengal Argo observations
+> (95 % → 95 %; mean calibration error ≈ 1 point for temperature). On the
+> withheld-monsoon-season split the temperature intervals are mildly
+> over-confident (~76 % actual for an 80 % nominal band), which we report rather
+> than tune away.
+
+**Do NOT** claim the calibration is a benefit *of* the regime conditioning or
+physics loss — the baseline calibrates just as well. It is a property of the
+variance head, shared by both models.
+
+---
+
 ## What stays exactly as written (fully supported by the build)
 
 - Regional focus on the Bay of Bengal / North Indian Ocean.

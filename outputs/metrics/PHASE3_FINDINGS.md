@@ -32,6 +32,34 @@ fraction 0.000) with or without it, so the penalty has nothing to push against.
 It is not harmful — just not doing work at this data scale. Worth re-checking on
 the full LOQ runs, but don't expect it to move the needle.
 
+## Uncertainty calibration
+
+Source: `outputs/metrics/calibration.csv` (per model × holdout × regime × T/S).
+The model emits a predicted variance per depth level; a nominal-*c* interval is
+`mean ± z(c)·std`. "Covers" = fraction of held-out Argo points inside that band.
+
+| model | holdout | regime | var | 80 % covers | 95 % covers | calib error |
+|---|---|---|---|---:|---:|---:|
+| OceanEmbed | spatial (BoB) | barrier-layer | T | 0.82 | 0.95 | 0.011 |
+| OceanEmbed | spatial (BoB) | all | T | 0.81 | 0.94 | 0.011 |
+| OceanEmbed | spatial (BoB) | barrier-layer | S | 0.84 | 0.95 | 0.027 |
+| baseline | spatial (BoB) | barrier-layer | T | 0.83 | 0.96 | 0.019 |
+| OceanEmbed | temporal (JJAS 22) | all | T | 0.76 | 0.92 | 0.026 |
+| OceanEmbed | temporal (JJAS 22) | well-mixed | T | 0.74 | 0.92 | 0.035 |
+
+- **On the Bay-of-Bengal spatial holdout the intervals are well-calibrated** —
+  claimed vs actual coverage agree to ≈ 1 pt for temperature, ≈ 3 pt for
+  salinity, across every regime including the barrier layer. This is the one
+  place OceanEmbed edges the baseline (T calib error 0.011 vs 0.019), though it
+  is a small difference.
+- **On the temporal holdout the temperature intervals are mildly over-confident**
+  (80 % band covers ~74–76 %), worst in the well-mixed regime. Expected: that
+  split is a single withheld monsoon season, so the error distribution shifts
+  from what the variance head saw in training.
+- Calibration is a property of the *variance head + NLL loss*, shared by both
+  models — it is not a conditioning or physics-loss effect. Worth re-checking on
+  the full LOQ runs but unlikely to regress.
+
 ## Honest assessment (CLAUDE.md §6.2 / §8)
 
 **On the primary holdout — the Bay of Bengal, barrier-layer regime — OceanEmbed

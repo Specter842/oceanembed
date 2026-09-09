@@ -127,6 +127,8 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .st-key-oe_nav div[role="radiogroup"] [class*="eqiohyi4"] { position:absolute !important; inset:0 !important;
   width:auto !important; height:auto !important; min-width:0 !important; min-height:0 !important;
   border:none !important; border-radius:12px !important; transition:background .12s; }
+/* active colour = Streamlit's primaryColor, painted natively on the checked radio
+   (updates correctly per rerun). Set primaryColor in .streamlit/config.toml. */
 .st-key-oe_nav div[role="radiogroup"] [class*="eqiohyi5"] { display:none !important; }
 .st-key-oe_nav div[role="radiogroup"] label [data-testid="stMarkdownContainer"] { display:none !important; }
 .st-key-oe_nav div[role="radiogroup"] > label::before { position:relative; z-index:2;
@@ -134,14 +136,10 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   -webkit-font-feature-settings:'liga'; font-feature-settings:'liga'; color:#FFFFFF; font-size:22px; }
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(1)::before { content:"\e871"; }
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(2)::before { content:"\eb3a"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(3)::before { content:"\f084"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(4)::before { content:"\f22b"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(5)::before { content:"\e268"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(6)::before { content:"\e9b0"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(7)::before { content:"\eaf6"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(8)::before { content:"\e922"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(9)::before { content:"\ea4b"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(10)::before { content:"\e88e"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(3)::before { content:"\e268"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(4)::before { content:"\e9b0"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(5)::before { content:"\e915"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(6)::before { content:"\e88e"; }
 @media (max-width:1100px){ .st-key-oe_nav{ position:static !important; width:auto !important;
     max-width:none !important; transform:none !important; max-height:none !important;
     flex-direction:row; padding:.5rem; }
@@ -327,6 +325,13 @@ def sec(anchor, icon, title, hint=""):
                 f'<div class="hint">{hint}</div></div>', unsafe_allow_html=True)
 
 
+def subsec(icon, title):
+    """A lighter in-page divider for merged views — icon + title, no prose."""
+    st.markdown(f'<div class="oe-sec" style="margin:1.9rem 0 .7rem">'
+                f'<div class="ic">{_ic(icon)}</div><div class="t">{title}</div>'
+                f'<div class="h"></div></div>', unsafe_allow_html=True)
+
+
 def domino(pct, n=10):
     f = int(round(np.clip(pct, 0, 1) * n))
     return ('<div class="oe-dom">'
@@ -450,15 +455,11 @@ def regime_map(A, month):
 # ---- navigation rail = the sidebar (in-place, no URL change) --------- #
 PAGES = [
     ("home", "dashboard", "Overview"),
-    ("s1", "satellite_alt", "Satellite input fields"),
-    ("s2", "waves", "Subsurface reconstruction"),
-    ("s3", "stacked_line_chart", "Skill by depth"),
-    ("s4", "scatter_plot", "Accuracy & calibration"),
-    ("s5", "grid_view", "Regime overlay"),
-    ("s6", "compare_arrows", "OceanEmbed vs baseline"),
-    ("s7", "timeline", "Training dynamics"),
-    ("s8", "science", "Physics consistency"),
-    ("s9", "info", "Data & scope"),
+    ("s1", "satellite_alt", "Inputs & reconstruction"),
+    ("s2", "scatter_plot", "Accuracy & calibration"),
+    ("s3", "grid_view", "Regime overlay"),
+    ("s4", "compare_arrows", "Model vs baseline"),
+    ("s5", "info", "Data & scope"),
 ]
 _ICON = {p: i for p, i, _ in PAGES}
 _TITLE = {p: t for p, _, t in PAGES}
@@ -668,10 +669,9 @@ if page == "home":
         ov2[1].plotly_chart(style_fig(f, h=270), use_container_width=True)
 
 
-# ---- 1 · satellite input fields --------------------------------------- #
+# ---- 1 · inputs & reconstruction ------------------------------------- #
 elif page == "s1":
-    sec("s1", "satellite_alt", "Satellite input fields",
-        "surface observations — the only model input")
+    sec("s1", "satellite_alt", "Inputs & reconstruction")
     wk = st.select_slider("week", [d.strftime("%Y-%m-%d") for d in weeks],
                           value=weeks[min(len(weeks) - 1, 86)].strftime("%Y-%m-%d"))
     wi = [d.strftime("%Y-%m-%d") for d in weeks].index(wk)
@@ -685,11 +685,8 @@ elif page == "s1":
         col.plotly_chart(heat(A[f"sat_{var}"][wi], LON, LAT, sc[var], lab),
                          use_container_width=True)
 
-
-# ---- 2 · subsurface reconstruction ---------------------------------- #
-elif page == "s2":
     need_pred()
-    sec("s2", "waves", "Subsurface reconstruction", "click a float location")
+    subsec("waves", "Reconstructed profile — click a float")
     L, R = st.columns([1, 1.25])
     with L:
         fm = px.scatter(pts, x="lon", y="lat", color="regime", color_discrete_map=RC,
@@ -736,11 +733,11 @@ elif page == "s2":
     c2.markdown(mini("RMSE·S", f"{rs_i:.2f} PSU"), unsafe_allow_html=True)
 
 
-# ---- 3 · skill by depth --------------------------------------------- #
-elif page == "s3":
+# ---- 2 · accuracy & calibration ------------------------------------- #
+elif page == "s2":
     need_pred()
-    sec("s3", "stacked_line_chart", "Skill by depth",
-        f"{holdout} holdout · barrier-layer regime · per level")
+    sec("s2", "scatter_plot", "Accuracy & calibration")
+    subsec("stacked_line_chart", "Skill by depth — barrier-layer regime")
     d = metrics[(metrics.test_set == holdout) & (metrics.depth_level >= 0)
                 & (metrics.regime_class == "barrier_layer_stratified")
                 & (metrics.model.isin(["baseline", model]))]
@@ -756,12 +753,7 @@ elif page == "s3":
                         yaxis=dict(title="depth m", autorange="reversed"))
         col.plotly_chart(style_fig(f, h=340), use_container_width=True)
 
-
-# ---- 4 · accuracy & calibration ----------------------------------- #
-elif page == "s4":
-    need_pred()
-    sec("s4", "scatter_plot", "Accuracy & calibration",
-        f"all {len(pts)} holdout profiles · {model}")
+    subsec("scatter_plot", "Predicted vs observed")
     gg = st.columns(2)
     for col, pk_, ok_, lab, cc in [(gg[0], "T_pred", "T_obs", "temperature °C", INK),
                                    (gg[1], "S_pred", "S_obs", "salinity PSU", "#7FA8C6")]:
@@ -782,12 +774,7 @@ elif page == "s4":
                                                     family="Space Grotesk"))])
         col.plotly_chart(style_fig(f, h=340, legend_top=False), use_container_width=True)
 
-    st.markdown('<div class="oe-sec" style="margin:1.8rem 0 .4rem">'
-                f'<div class="ic">{_ic("balance")}</div>'
-                '<div class="t">Is the uncertainty honest?</div><div class="h"></div>'
-                '<div class="hint">does a claimed X% interval actually contain the truth '
-                'X% of the time</div></div>', unsafe_allow_html=True)
-
+    subsec("balance", "Is the uncertainty honest?")
     cT, cS = calib(pred, "T"), calib(pred, "S")
     kc = st.columns(4)
     for c, (lv_, cd, unit) in zip(kc, [(0.80, cT, "°C"), (0.95, cT, "°C"),
@@ -813,15 +800,11 @@ elif page == "s4":
                                           font=dict(color="#0D0D0D", size=12,
                                                     family="Space Grotesk"))])
         col.plotly_chart(style_fig(f, h=300), use_container_width=True)
-    st.caption("Predicted-std intervals. A point on the dashed line = a band that is neither "
-               "over- nor under-confident. Above the line = intervals too wide; below = too "
-               "narrow (over-confident).")
 
 
-# ---- 5 · regime overlay ------------------------------------------- #
-elif page == "s5":
-    sec("s5", "grid_view", "Regime overlay",
-        "class from independent climatology + discharge — never the satellite channels")
+# ---- 3 · regime overlay ------------------------------------------- #
+elif page == "s3":
+    sec("s3", "grid_view", "Regime overlay")
     mo = st.slider("month", 1, 12, 8)
     L2, R2 = st.columns([1.4, 1])
     with L2:
@@ -853,9 +836,9 @@ elif page == "s5":
             st.plotly_chart(style_fig(f, h=165, legend_top=False), use_container_width=True)
 
 
-# ---- 6 · OceanEmbed vs baseline --------------------------------- #
-elif page == "s6":
-    sec("s6", "compare_arrows", "OceanEmbed vs baseline", "per-regime RMSE, pooled over depth")
+# ---- 4 · model vs baseline ------------------------------------- #
+elif page == "s4":
+    sec("s4", "compare_arrows", "Model vs baseline")
     if metrics is not None:
         var = st.radio("variable", ["rmse_T", "rmse_S"], horizontal=True, key="oe_var",
                        format_func=lambda s: "Temperature" if s.endswith("T") else "Salinity")
@@ -874,10 +857,7 @@ elif page == "s6":
                          .pivot_table(index=["test_set", "regime_class"], columns="model",
                                       values=var).round(3), use_container_width=True)
 
-
-# ---- 7 · training dynamics ---------------------------------------- #
-elif page == "s7":
-    sec("s7", "timeline", "Training dynamics", "validation RMSE per epoch")
+    subsec("timeline", "Training dynamics")
     if logs:
         gg = st.columns(2)
         for col, yv, lab in zip(gg, ("rmseT", "rmseS"), ("val RMSE T °C", "val RMSE S PSU")):
@@ -891,11 +871,7 @@ elif page == "s7":
     else:
         st.info("no training logs found")
 
-
-# ---- 8 · physics consistency ------------------------------------- #
-elif page == "s8":
-    sec("s8", "science", "Physics consistency",
-        "TEOS-10 density-inversion fraction · lower is better")
+    subsec("science", "Physics consistency")
     if phys is not None:
         f = go.Figure()
         for ts, cc in [("spatial", INK), ("temporal", AQUA)]:
@@ -908,9 +884,9 @@ elif page == "s8":
                    "physics loss term has little to correct at this data scale.")
 
 
-# ---- 9 · data & scope ------------------------------------------- #
-elif page == "s9":
-    sec("s9", "info", "Data & scope")
+# ---- 5 · data & scope ----------------------------------------- #
+elif page == "s5":
+    sec("s5", "info", "Data & scope")
     st.markdown(
         '<div class="oe-card" style="border-radius:20px;border-left:3px solid #6FC0F5;">'
         'This demo runs on <b>historical downloaded satellite and Argo data</b>. Real-time '
