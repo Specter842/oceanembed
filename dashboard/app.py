@@ -87,12 +87,17 @@ st.markdown(r"""
   font-feature-settings:'liga'; font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
 
 .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { background:#A7C4D6 !important; }
-[data-testid="stHeader"] { background:transparent !important; height:0; }
+/* hide Streamlit's own chrome — the Share / star / edit / Deploy bar + status widget */
+[data-testid="stHeader"], [data-testid="stToolbar"], [data-testid="stToolbarActions"],
+[data-testid="stDecoration"], [data-testid="stStatusWidget"], .stDeployButton { display:none !important; }
+[data-testid="stAppViewBlockContainer"] { padding-top:0 !important; }
 [data-testid="stMainBlockContainer"] {
   background:#E4EEF5; border-radius:30px; max-width:1440px; position:relative;
-  padding:2rem 2.3rem 3rem 7rem !important; margin:1.1rem auto 1.4rem;
+  padding:1.35rem 2.3rem 3rem 7rem !important; margin:.75rem auto 1.4rem;
   box-shadow:0 24px 60px -20px rgba(0,0,0,.30); scroll-behavior:smooth;
 }
+/* the top-of-page CSS/link injections render as empty flex rows — shrink the gap */
+[data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"] { gap:.6rem; }
 html { scroll-behavior:smooth; }
 html, body, [class*="css"], p, span, div, label, .stMarkdown { font-family:'Inter',system-ui,sans-serif; color:#111; }
 h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
@@ -106,7 +111,23 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   transform:translateY(-50%) !important;
   width:3.7rem !important; min-width:3.7rem !important; max-width:3.7rem !important;
   background:#0D0D0D !important; border-radius:24px !important; padding:1rem .55rem !important;
-  margin:0 !important; }
+  margin:0 !important; transition:width .17s ease, min-width .17s ease, max-width .17s ease; }
+/* hover the rail -> it widens and every icon shows its page name */
+[data-testid="stApp"] .st-key-oe_nav:hover {
+  width:14.5rem !important; min-width:14.5rem !important; max-width:14.5rem !important;
+  box-shadow:0 22px 54px -14px rgba(0,0,0,.55); }
+.st-key-oe_nav:hover div[role="radiogroup"] { align-items:stretch !important; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label { width:100% !important;
+  justify-content:flex-start !important; padding-left:.5rem !important; overflow:visible !important; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label::before { margin-right:.7rem; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label [data-testid="stMarkdownContainer"] {
+  display:block !important; position:relative; z-index:2; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label [data-testid="stMarkdownContainer"] p {
+  margin:0 !important; color:#F3F8FC; font-size:.8rem; font-weight:500; white-space:nowrap;
+  font-family:'Space Grotesk','Inter',sans-serif; }
+/* keep the real radio input out of the way (label click still selects it) */
+.st-key-oe_nav div[role="radiogroup"] > label > span:first-child {
+  position:absolute !important; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
 /* nav item 1 (the sailing icon) = brand mark + link to the About view */
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(1) { margin-bottom:.7rem !important; }
 .st-key-oe_nav [data-testid="stWidgetLabel"], .st-key-oe_nav [data-testid="stCaptionContainer"] { display:none !important; }
@@ -140,10 +161,12 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(5)::before { content:"\e9b0"; }
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(6)::before { content:"\e915"; }
 .st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(7)::before { content:"\e88e"; }
-@media (max-width:1100px){ .st-key-oe_nav{ position:static !important; width:auto !important;
+@media (max-width:1100px){ .st-key-oe_nav, [data-testid="stApp"] .st-key-oe_nav:hover {
+    position:static !important; width:auto !important; min-width:0 !important;
     max-width:none !important; transform:none !important; max-height:none !important;
     flex-direction:row; padding:.5rem; }
   .st-key-oe_nav div[role="radiogroup"]{ flex-direction:row !important; flex-wrap:wrap; }
+  .st-key-oe_nav:hover div[role="radiogroup"] > label [data-testid="stMarkdownContainer"] { display:none !important; }
   .st-key-oe_nav::before{ display:none; } }
 
 /* ---- display heading ---- */
