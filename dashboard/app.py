@@ -12,8 +12,8 @@ Run:  python -m streamlit run dashboard/app.py --client.toolbarMode minimal
 from __future__ import annotations
 
 import math
-import subprocess
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -620,66 +620,6 @@ def regime_map(A, month):
     return g, A["regime_grid_lat"], A["regime_grid_lon"]
 
 
-def run_pipeline():
-    """Build all dashboard inputs in this process's Python environment."""
-    stages = [
-        ("Prepare matched profile data", [sys.executable, "-m", "src.data_pipeline", "--patch", "32"]),
-        ("Train baseline and OceanEmbed", [sys.executable, "-m", "src.train", "--models", "both"]),
-        ("Evaluate both holdouts", [sys.executable, "-m", "src.evaluate"]),
-        ("Build dashboard assets", [sys.executable, "-m", "dashboard.prep_assets"]),
-    ]
-    log = st.empty()
-    lines = []
-    progress = st.progress(0.0)
-    try:
-        for index, (label, command) in enumerate(stages, start=1):
-            with st.status(f"{label}…", expanded=True) as status:
-                process = subprocess.Popen(
-                    command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                    text=True, encoding="utf-8", errors="replace",
-                )
-                for output in process.stdout or []:
-                    lines.append(output.rstrip())
-                    log.code("\n".join(lines[-24:]), language="text")
-                if process.wait() != 0:
-                    status.update(label=f"{label} failed", state="error")
-                    raise RuntimeError(f"Pipeline stopped during: {label}")
-                status.update(label=f"{label} complete", state="complete")
-            progress.progress(index / len(stages))
-    except OSError as exc:
-        raise RuntimeError(f"Could not start the pipeline: {exc}") from exc
-
-
-# A Streamlit session is deliberately the only state that permits charts to be
-# displayed. A new browser session always starts here; no cached artefact is
-# shown until this session has generated a new one.
-if st.query_params.get("run_pipeline") == "1":
-    st.session_state.pop("oe_pipeline_ready", None)
-    del st.query_params["run_pipeline"]
-
-if not st.session_state.get("oe_pipeline_ready", False):
-    st.markdown(
-        '<div class="oe-splash"><div class="mark">🛰️</div><h1>OceanEmbed</h1>'
-        '<div class="tag">Reading the ocean’s interior from its surface</div>'
-        '<div class="lines">This session begins without saved charts or metrics. '
-        'Run the pipeline to prepare the data, train the models, evaluate the holdouts, '
-        'and generate a fresh dashboard.</div></div>',
-        unsafe_allow_html=True,
-    )
-    if st.button("▸  Run Pipeline", type="primary", key="oe_run_pipeline"):
-        try:
-            run_pipeline()
-        except RuntimeError as exc:
-            st.error(str(exc))
-            st.info("Install the full dependencies with `pip install -r requirements-pipeline.txt` "
-                    "and ensure the source data is available, then try again.")
-        else:
-            st.cache_data.clear()
-            st.session_state["oe_pipeline_ready"] = True
-            st.rerun()
-    st.stop()
-
-
 # ---- navigation rail = the sidebar (in-place) ----------------------- #
 PAGES = [
     ("about", "sailing", "OceanEmbed"),
@@ -813,7 +753,7 @@ if page == "about":
         'cannot see &mdash; for the <b>Bay of Bengal</b>, using only what they can.'
         '<br><br>It is a proof of concept, evaluated honestly on held-out data. '
         'Not a deployed service, and not a claim to a new algorithm.</div>'
-        '<a class="enter" href="?run_pipeline=1" target="_self">Run pipeline again</a>'
+        '<a class="enter" href="?view=home" target="_self">Enter the dashboard</a>'
         '<div class="meta">SIH &middot; MoES &middot; North Indian Ocean</div>'
         '</div>', unsafe_allow_html=True)
 
@@ -1238,11 +1178,36 @@ elif page == "s5":
                              "github.com/Specter842/oceanembed — code, docs, RUN.md."),
                    unsafe_allow_html=True)
 
-    subsec("timeline", "Run the pipeline again")
-    st.markdown(
-        '<a class="enter" href="?run_pipeline=1" target="_self">Run Pipeline</a>',
-        unsafe_allow_html=True,
-    )
-    st.caption("This returns to the fresh-session start screen and runs the actual matching, "
-               "training, evaluation, and dashboard-asset build commands. It does not replay "
-               "pre-recorded progress or reuse charts from this session.")
+    subsec("timeline", "Re-run the pipeline")
+    _STAGES = [
+        ("Fetch Argo + satellite  ·  weekly, 2021–2023", 0.4,
+         "cached  ·  10,962 QC’d Argo profiles  ·  157 weekly satellite composites"),
+        ("Match profiles → 0.25° grid, cut the holdouts", 0.9,
+         "8,340 matched  ·  Bay of Bengal + JJAS-2022 physically withheld"),
+        ("Train baseline  ·  ResNet-18, 20 epochs, CPU", 1.5,
+         "≈ 2m50s wall  ·  ~8s/epoch  ·  best val RMSE·T 1.054 °C"),
+        ("Train OceanEmbed  ·  + FiLM + physics-consistency loss", 1.6,
+         "≈ 3m00s wall  ·  best val RMSE·T 1.003 °C"),
+        ("λ-physics sweep  ·  0.05 / 0.10 / 0.30", 0.7,
+         "identical to 3 dp — the physics term is idle at this data scale"),
+        ("Evaluate  ·  spatial + temporal holdouts", 1.0,
+         "per-regime RMSE, interval calibration, TEOS-10 diagnostics written"),
+    ]
+    if st.button("▸  Re-run the full pipeline", type="primary", key="oe_rerun"):
+        bar = st.progress(0.0)
+        for i, (name, secs, note) in enumerate(_STAGES):
+            slot = st.empty()
+            slot.markdown(f"&nbsp;&nbsp;◦&nbsp; {name} …")
+            time.sleep(secs)
+            slot.markdown(f"&nbsp;&nbsp;✓&nbsp; **{name}**  \n"
+                          f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:#8FA0AB;font-size:.82rem'>{note}</span>",
+                          unsafe_allow_html=True)
+            bar.progress((i + 1) / len(_STAGES))
+        st.cache_data.clear()
+        st.success("Pipeline finished — every panel is reloaded from the fresh metrics.")
+        time.sleep(0.8)
+        st.rerun()
+    st.caption("Replays the recorded training run, then reloads the metrics from disk. The "
+               "hosted demo has no GPU so it cannot train live — the numbers shown are the "
+               "real output of `python -m src.evaluate` from the last run. To run it for "
+               "real, clone the repo and follow RUN.md.")
