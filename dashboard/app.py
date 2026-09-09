@@ -246,8 +246,8 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   padding:1.15rem 1.3rem; height:100%;
   box-shadow:0 6px 18px -8px rgba(20,52,82,.22); }
 .oe-card.hero { min-height:12.5rem; display:flex; flex-direction:column; }
-.oe-card.lime { background:#6FC0F5; border-color:#3E9AD6; }
-.oe-card.lime .lab, .oe-card.lime .unit { color:rgba(13,13,13,.64) !important; }
+.oe-card.lime { background:#FFF; border-color:#6FC0F5; border-width:2px; }
+.oe-card.lime .val { color:#2C7AB0; }
 .oe-card.ink  { background:#0D0D0D; border-color:#333B41; }
 .oe-card .lab { font-size:.72rem; font-weight:600; letter-spacing:.6px; text-transform:uppercase; color:#8FA0AB; }
 .oe-card.ink .lab { color:#8A97A1; }
@@ -262,10 +262,9 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .oe-dom { display:flex; gap:.34rem; margin-top:1rem; }
 .oe-dom i { flex:1; height:13px; border-radius:4px; }
 .oe-dom i.f { background:#0D0D0D; }
-.oe-card.lime .oe-dom i.f { background:#0D0D0D; }
+.oe-card.lime .oe-dom i.f { background:#6FC0F5; }
 .oe-card.ink .oe-dom i.f { background:#6FC0F5; }
 .oe-dom i.e { border:1.5px dashed #BDCAD3; }
-.oe-card.lime .oe-dom i.e { border-color:rgba(0,0,0,.28); }
 .oe-card.ink .oe-dom i.e { border-color:#333; }
 .oe-insight { margin-top:auto; padding-top:.9rem; font-size:.8rem; line-height:1.45; color:#AFC0CC; }
 .oe-insight b { color:#6FC0F5; }
@@ -273,6 +272,16 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   box-shadow:0 5px 14px -7px rgba(20,52,82,.20); }
 .oe-mini .lab { font-size:.66rem; font-weight:600; letter-spacing:.5px; text-transform:uppercase; color:#8FA0AB; }
 .oe-mini .val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.4rem; color:#0D0D0D; margin-top:.15rem; }
+.oe-mini.blue { background:#6FC0F5; border-color:#54AEE6; }
+.oe-mini.blue .lab { color:rgba(13,13,13,.62); }
+.oe-mini.blue .val { color:#0D0D0D; }
+.oe-mini.blue .val span { color:rgba(13,13,13,.6) !important; }
+.oe-mrow { display:grid; grid-template-columns:repeat(6,1fr); gap:.9rem; margin:.2rem 0 0; }
+.oe-mrow .oe-mini { border-radius:16px; padding:.8rem .9rem; }
+.oe-mrow .oe-mini .val { font-size:1.15rem; line-height:1.15; }
+.oe-mrow .oe-mini .lab { font-size:.6rem; }
+@media (max-width:1150px){ .oe-mrow { grid-template-columns:repeat(3,1fr); } }
+@media (max-width:640px){ .oe-mrow { grid-template-columns:repeat(2,1fr); gap:.6rem; } }
 
 .stPlotlyChart { background:#FFF; border:1.5px solid #C1D5E3; border-radius:22px; padding:.5rem .3rem;
   box-shadow:0 6px 18px -8px rgba(20,52,82,.20); }
@@ -385,8 +394,9 @@ def kpi_big(kind, lab, val, unit, pct, badge=None):
             f'{domino(pct)}</div>')
 
 
-def mini(lab, val):
-    return f'<div class="oe-mini"><div class="lab">{lab}</div><div class="val">{val}</div></div>'
+def mini(lab, val, blue=False):
+    cls = "oe-mini blue" if blue else "oe-mini"
+    return f'<div class="{cls}"><div class="lab">{lab}</div><div class="val">{val}</div></div>'
 
 
 def link_card(icon, title, desc):
@@ -690,15 +700,17 @@ elif page == "home":
         _pr = phys[(phys.model == model) & (phys.test_set == holdout)]
         if len(_pr):
             inv = float(_pr.inversion_fraction.iloc[0]) * 100
-    m = st.columns(6)
-    m[0].markdown(mini("weekly satellite fields", f"{len(weeks)}"), unsafe_allow_html=True)
-    m[1].markdown(mini("depth levels", "18  ·  0–2000 m"), unsafe_allow_html=True)
-    m[2].markdown(mini(f"{holdout} holdout · n", f"{n_ho}"), unsafe_allow_html=True)
-    m[3].markdown(mini("80% interval covers · T",
-                       f"{cov80:.0f}%" if cov80 is not None else "—"), unsafe_allow_html=True)
-    m[4].markdown(mini("density inversions",
-                       f"{inv:.2f}%" if inv == inv else "—"), unsafe_allow_html=True)
-    m[5].markdown(mini("backbone", "ResNet-18 · prelim"), unsafe_allow_html=True)
+    _mrow = [
+        ("weekly satellite fields", f"{len(weeks)}"),
+        ("depth levels", "18 · 0–2000 m"),
+        (f"{holdout} holdout · n", f"{n_ho}"),
+        ("80% interval covers · T", f"{cov80:.0f}%" if cov80 is not None else "—"),
+        ("density inversions", f"{inv:.2f}%" if inv == inv else "—"),
+        ("backbone", "ResNet-18 · prelim"),
+    ]
+    st.markdown('<div class="oe-mrow">'
+                + "".join(mini(l, v, blue=True) for l, v in _mrow)
+                + "</div>", unsafe_allow_html=True)
 
     sec("home", "monitoring", "At a glance",
         f"{model} · {holdout} holdout — open any panel from the rail for detail")
