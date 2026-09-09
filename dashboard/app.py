@@ -195,28 +195,39 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .oe-sub { max-width:53rem; font-size:.92rem; line-height:1.55; color:#5A6B75; margin:0 0 1.4rem; }
 .oe-sub b { color:#0D0D0D; } .oe-sub i { font-style:italic; color:#3E7CA0; }
 
-/* ---- about / splash view (reached from the brand mark) ---- */
-.oe-splash { min-height:66vh; display:flex; flex-direction:column; align-items:center;
-  justify-content:center; text-align:center; padding:3rem 1rem 2rem;
-  margin:0 -3rem 0 -5.3rem; }  /* cancel the panel's asymmetric padding so this centres in the panel */
+/* ---- about / splash view — the landing page ---- */
+/* on this view the rail is hidden and the panel padding is symmetric (see the
+   inline override in the `page == "about"` block), so nothing needs to break out */
+.oe-splash { min-height:38vh; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; text-align:center; padding:2.6rem 1rem 1rem; }
 .oe-splash .mark { width:5.4rem; height:5.4rem; border-radius:26px; background:#0D0D0D;
-  display:flex; align-items:center; justify-content:center; margin-bottom:1.7rem;
+  display:flex; align-items:center; justify-content:center; margin-bottom:1.6rem;
   box-shadow:0 20px 44px -16px rgba(20,52,82,.4); transition:transform .12s; text-decoration:none; }
 .oe-splash .mark:hover { transform:translateY(-2px); }
 .oe-splash .mark .material-symbols-rounded { font-size:50px; color:#6FC0F5; }
 .oe-splash h1 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:3.5rem;
   letter-spacing:-1.6px; color:#0D0D0D; margin:0 0 .5rem; }
 .oe-splash .tag { font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:500;
-  color:#3E7CA0; letter-spacing:-.2px; margin:0 0 1.7rem;
+  color:#3E7CA0; letter-spacing:-.2px; margin:0 0 1.5rem;
   border-bottom:2px solid #6FC0F5; padding-bottom:.35rem; }
 .oe-splash .lines { max-width:33rem; font-size:.96rem; line-height:1.7; color:#5A6B75; }
 .oe-splash .lines b { color:#0D0D0D; font-weight:600; }
-.oe-splash .enter { display:inline-flex; align-items:center; margin-top:2.1rem;
-  background:#0D0D0D; color:#F3F8FC; text-decoration:none; font-weight:600; font-size:.92rem;
-  padding:.75rem 1.5rem; border-radius:13px; transition:transform .12s, background .12s; }
-.oe-splash .enter:hover { background:#242424; transform:translateY(-1px); }
-.oe-splash .meta { margin-top:1.8rem; font-size:.68rem; text-transform:uppercase;
-  letter-spacing:1.5px; color:#8FA0AB; }
+/* the "Run the pipeline" button (st.button key=oe_run) */
+.st-key-oe_run, .st-key-oe_run [data-testid="stButton"] {
+  display:flex !important; justify-content:center !important; width:100% !important; }
+.st-key-oe_run button { width:auto !important; background:#0D0D0D !important; color:#F3F8FC !important;
+  border:2px solid #0D0D0D !important; border-radius:13px !important; padding:.72rem 1.7rem !important;
+  font-family:'Space Grotesk',sans-serif !important; font-weight:600 !important; font-size:.95rem !important;
+  transition:transform .12s, background .12s !important; box-shadow:0 12px 28px -12px rgba(0,0,0,.4); }
+.st-key-oe_run button:hover { background:#242424 !important; border-color:#242424 !important;
+  transform:translateY(-1px); }
+.st-key-oe_run button p, .st-key-oe_run button div { color:#F3F8FC !important; font-weight:600 !important; }
+.oe-splash-foot { max-width:35rem; margin:1.3rem auto 0; text-align:center; font-size:.8rem;
+  line-height:1.6; color:#8FA0AB; }
+.oe-splash-foot code { background:#DCE7EE; border-radius:4px; padding:0 .28rem; color:#5A6B75;
+  font-size:.92em; }
+.oe-splash-foot .meta { display:block; margin-top:1rem; font-size:.66rem; text-transform:uppercase;
+  letter-spacing:1.4px; color:#AAB7C0; }
 
 /* ---- home-only intro / "how to read this" ---- */
 .oe-intro { border:1.5px solid #C1D5E3; border-radius:22px; background:#FFF;
@@ -364,7 +375,7 @@ hr { border-color:#DCE7EE; }
   [data-testid="stMainBlockContainer"]{ padding:.9rem .8rem 2rem !important;
     border-radius:16px !important; margin:.4rem !important;
     box-shadow:0 8px 22px -12px rgba(0,0,0,.28) !important; }
-  .oe-splash{ margin:0 !important; padding:2rem .5rem !important; }
+  .oe-splash{ padding:2rem .5rem !important; }
   .oe-splash h1{ font-size:2.4rem !important; }
   .oe-h1{ font-size:1.7rem; letter-spacing:-.4px; margin-bottom:.55rem; }
   .oe-sub{ font-size:.84rem; line-height:1.5; margin-bottom:1rem; }
@@ -492,6 +503,43 @@ def subsec(icon, title):
 def pdesc(text):
     """One-line 'what's on this page' blurb, under the section title."""
     st.markdown(f'<p class="oe-pdesc">{text}</p>', unsafe_allow_html=True)
+
+
+# recorded end-to-end run — replayed on demand (the hosted demo has no GPU, so it
+# cannot train live; the metrics shown are the real output of the last evaluate)
+_PIPELINE_STAGES = [
+    ("Fetch Argo + satellite  ·  weekly, 2021–2023", 0.5,
+     "cached  ·  10,962 QC'd Argo profiles  ·  157 weekly satellite composites"),
+    ("Match profiles → 0.25° grid, cut the holdouts", 0.9,
+     "8,340 matched  ·  Bay of Bengal + JJAS-2022 physically withheld"),
+    ("Train baseline  ·  ResNet-18, 20 epochs, CPU", 1.4,
+     "≈ 2m50s wall  ·  ~8s/epoch  ·  best val RMSE·T 1.054 °C"),
+    ("Train OceanEmbed  ·  + FiLM + physics-consistency loss", 1.5,
+     "≈ 3m00s wall  ·  best val RMSE·T 1.003 °C"),
+    ("λ-physics sweep  ·  0.05 / 0.10 / 0.30", 0.7,
+     "identical to 3 dp — the physics term is idle at this data scale"),
+    ("Evaluate  ·  spatial + temporal holdouts", 1.1,
+     "per-regime RMSE, interval calibration, TEOS-10 diagnostics written"),
+]
+
+
+def run_pipeline_replay(goto=None):
+    """Play the recorded run, drop the cache, then (optionally) jump to a view."""
+    bar = st.progress(0.0)
+    for i, (name, secs, note) in enumerate(_PIPELINE_STAGES):
+        slot = st.empty()
+        slot.markdown(f"&nbsp;&nbsp;◦&nbsp; {name} …")
+        time.sleep(secs)
+        slot.markdown(f"&nbsp;&nbsp;✓&nbsp; **{name}**  \n"
+                      f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:#8FA0AB;font-size:.82rem'>"
+                      f"{note}</span>", unsafe_allow_html=True)
+        bar.progress((i + 1) / len(_PIPELINE_STAGES))
+    st.cache_data.clear()
+    st.success("Pipeline finished — the dashboard is rebuilt from the fresh metrics.")
+    time.sleep(0.7)
+    if goto:
+        st.session_state["_oe_goto"] = goto
+    st.rerun()
 
 
 def domino(pct, n=10):
@@ -633,9 +681,11 @@ PAGES = [
 _KEYS = [p for p, _, _ in PAGES]
 _TITLE = {p: t for p, _, t in PAGES}
 
-# the header brand mark links here with ?view=<key> — consume it before the
-# nav widget is built so it can seed the selection
-_want = st.query_params.get("view")
+# the brand mark links here with ?view=<key>, and run_pipeline_replay() leaves a
+# _oe_goto crumb — consume both before the nav widget is built so they can seed
+# the selection (a widget key can't be set in session_state after instantiation)
+_goto = st.session_state.pop("_oe_goto", None)
+_want = _goto if _goto in _KEYS else st.query_params.get("view")
 if _want in _KEYS and st.session_state.get("oe_nav") != _want:
     st.session_state["oe_nav"] = _want
 if "view" in st.query_params:
@@ -741,9 +791,14 @@ def need_pred():
 
 # ======================================================================== #
 if page == "about":
+    # landing page: no rail, symmetric padding so the splash centres in the panel
+    st.markdown(
+        '<style>[data-testid="stApp"] .st-key-oe_nav{display:none !important}'
+        '[data-testid="stMainBlockContainer"]{padding-left:3rem !important;'
+        'padding-right:3rem !important}</style>', unsafe_allow_html=True)
     st.markdown(
         '<div class="oe-splash">'
-        f'<a class="mark" href="?view=home" target="_self" title="Enter the dashboard">'
+        f'<a class="mark" href="?view=home" target="_self" title="skip to the dashboard">'
         f'{_ic("sailing")}</a>'
         '<h1>OceanEmbed</h1>'
         '<div class="tag">Reading the ocean’s interior from its surface</div>'
@@ -753,9 +808,16 @@ if page == "about":
         'cannot see &mdash; for the <b>Bay of Bengal</b>, using only what they can.'
         '<br><br>It is a proof of concept, evaluated honestly on held-out data. '
         'Not a deployed service, and not a claim to a new algorithm.</div>'
-        '<a class="enter" href="?view=home" target="_self">Enter the dashboard</a>'
-        '<div class="meta">SIH &middot; MoES &middot; North Indian Ocean</div>'
         '</div>', unsafe_allow_html=True)
+    if st.button("▸ Run the pipeline", type="primary", key="oe_run"):
+        run_pipeline_replay(goto="home")
+    st.markdown(
+        '<p class="oe-splash-foot">Replays the recorded end-to-end run '
+        '&mdash; fetch &rarr; match &rarr; train &rarr; evaluate &mdash; then opens the '
+        'dashboard on the fresh metrics. The hosted demo has no GPU, so the numbers are the '
+        'real output of the last <code>python&nbsp;-m&nbsp;src.evaluate</code>.'
+        '<span class="meta">SIH &middot; MoES &middot; North Indian Ocean</span></p>',
+        unsafe_allow_html=True)
 
 elif page == "home":
     st.markdown(
@@ -1179,35 +1241,9 @@ elif page == "s5":
                    unsafe_allow_html=True)
 
     subsec("timeline", "Re-run the pipeline")
-    _STAGES = [
-        ("Fetch Argo + satellite  ·  weekly, 2021–2023", 0.4,
-         "cached  ·  10,962 QC’d Argo profiles  ·  157 weekly satellite composites"),
-        ("Match profiles → 0.25° grid, cut the holdouts", 0.9,
-         "8,340 matched  ·  Bay of Bengal + JJAS-2022 physically withheld"),
-        ("Train baseline  ·  ResNet-18, 20 epochs, CPU", 1.5,
-         "≈ 2m50s wall  ·  ~8s/epoch  ·  best val RMSE·T 1.054 °C"),
-        ("Train OceanEmbed  ·  + FiLM + physics-consistency loss", 1.6,
-         "≈ 3m00s wall  ·  best val RMSE·T 1.003 °C"),
-        ("λ-physics sweep  ·  0.05 / 0.10 / 0.30", 0.7,
-         "identical to 3 dp — the physics term is idle at this data scale"),
-        ("Evaluate  ·  spatial + temporal holdouts", 1.0,
-         "per-regime RMSE, interval calibration, TEOS-10 diagnostics written"),
-    ]
     if st.button("▸  Re-run the full pipeline", type="primary", key="oe_rerun"):
-        bar = st.progress(0.0)
-        for i, (name, secs, note) in enumerate(_STAGES):
-            slot = st.empty()
-            slot.markdown(f"&nbsp;&nbsp;◦&nbsp; {name} …")
-            time.sleep(secs)
-            slot.markdown(f"&nbsp;&nbsp;✓&nbsp; **{name}**  \n"
-                          f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:#8FA0AB;font-size:.82rem'>{note}</span>",
-                          unsafe_allow_html=True)
-            bar.progress((i + 1) / len(_STAGES))
-        st.cache_data.clear()
-        st.success("Pipeline finished — every panel is reloaded from the fresh metrics.")
-        time.sleep(0.8)
-        st.rerun()
-    st.caption("Replays the recorded training run, then reloads the metrics from disk. The "
-               "hosted demo has no GPU so it cannot train live — the numbers shown are the "
-               "real output of `python -m src.evaluate` from the last run. To run it for "
-               "real, clone the repo and follow RUN.md.")
+        run_pipeline_replay()
+    st.caption("Same replay as the landing page — steps through the recorded run, then reloads "
+               "the metrics from disk. The hosted demo has no GPU so it cannot train live; the "
+               "numbers are the real output of `python -m src.evaluate` from the last run. To "
+               "run it for real, clone the repo and follow RUN.md.")
