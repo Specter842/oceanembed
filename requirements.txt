@@ -1,11 +1,10 @@
-# OceanEmbed — dashboard runtime (Phase 4).
+# OceanEmbed — deployed app runtime.
 #
-# This is the ONLY thing the Streamlit demo needs. It reads pre-baked
-# artefacts (dashboard/assets.npz + outputs/metrics/*.csv / *.npz) and never
-# imports torch / xarray / netCDF4 / gsw, so the deploy stays small and fast.
-#
-# To rebuild data, train, or evaluate, use requirements-pipeline.txt instead
-# (adds xarray, netCDF4, torch, gsw, erddapy, …) — see RUN.md.
+# The dashboard's Run Pipeline action prepares data, trains, evaluates, and
+# rebuilds its assets on the host. It therefore needs the complete pipeline
+# environment, not merely the pre-baked-chart viewer dependencies.
+
+-r requirements-pipeline.txt
 
 streamlit==1.63.0     # pinned: the dashboard CSS targets this version's DOM
 plotly>=5.24
