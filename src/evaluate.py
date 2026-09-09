@@ -124,6 +124,40 @@ def metrics_for(res, model_name, test_set, regime_classes):
     return rows
 
 
+_Z = {0.68: 0.9945, 0.80: 1.2816, 0.90: 1.6449, 0.95: 1.9600}
+
+
+def calibration_for(res, model_name, test_set, regime_classes):
+    """Interval-calibration rows: does a nominal-c predicted-std interval
+    (mean +/- z(c)*std) actually contain the truth c of the time?"""
+    import math
+    rows = []
+    zs = np.linspace(0.15, 2.7, 20)
+    for rn in list(regime_classes) + ["all"]:
+        if rn == "all":
+            sel = np.ones(len(res["regime"]), bool)
+        else:
+            sel = res["regime"] == regime_classes.index(rn)
+        if sel.sum() == 0:
+            continue
+        for var in ("T", "S"):
+            m = res["mask"][sel] > 0
+            err = np.abs(res[f"{var}_pred"][sel][m] - res[f"{var}_obs"][sel][m])
+            sd = np.maximum(res[f"{var}_std"][sel][m], 1e-9)
+            if err.size < 20:
+                continue
+            nominal = np.array([math.erf(z / math.sqrt(2)) for z in zs])
+            empirical = np.array([float(np.mean(err <= z * sd)) for z in zs])
+            ece = float(np.mean(np.abs(empirical - nominal)))
+            row = dict(model=model_name, test_set=test_set, regime_class=rn,
+                       variable=var, n_points=int(err.size), calib_error=ece)
+            for c, z in _Z.items():
+                row[f"cover_{int(c*100)}"] = float(np.mean(err <= z * sd))
+                row[f"width_{int(c*100)}"] = float(np.mean(2.0 * z * sd))
+            rows.append(row)
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--checkpoints", nargs="+", default=["oceanembed", "baseline"])
@@ -134,7 +168,7 @@ def main():
     METRICS.mkdir(parents=True, exist_ok=True)
 
     stats = NormStats()
-    all_rows, phys_rows = [], []
+    all_rows, phys_rows, calib_rows = [], [], []
     for name in args.checkpoints:
         model, cfg, blob = load_model(name)
         for ts in args.test_sets:
@@ -144,6 +178,7 @@ def main():
 
             np.savez_compressed(METRICS / f"predictions_{name}_{ts}.npz", **res)
             all_rows += metrics_for(res, name, ts, regime_classes)
+            calib_rows += calibration_for(res, name, ts, regime_classes)
 
             pd_ = physics_diagnostics_gsw(res["T_pred"], res["S_pred"],
                                           res["depth_levels"], res["lon"], res["lat"],
@@ -161,7 +196,9 @@ def main():
     df = pd.DataFrame(all_rows)
     df.to_csv(METRICS / "per_regime_rmse.csv", index=False)
     pd.DataFrame(phys_rows).to_csv(METRICS / "physics_diagnostics.csv", index=False)
+    pd.DataFrame(calib_rows).to_csv(METRICS / "calibration.csv", index=False)
     print(f"\n  -> {METRICS / 'per_regime_rmse.csv'}  ({len(df)} rows)")
+    print(f"  -> {METRICS / 'calibration.csv'}  ({len(calib_rows)} rows)")
 
     # headline comparison
     head = (df[(df.depth_level == -1)]

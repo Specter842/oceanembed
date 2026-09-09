@@ -33,6 +33,8 @@ matplotlib
 # --- dashboard (Phase 4) ---
 streamlit
 plotly
+fonttools           # dashboard/prep_iconfont.py — rebuild the inlined icon subset
+brotli              # woff2 encoder for the above
 
 # --- optional: Prithvi-EO geospatial backbone (§5.1) ---
 # terratorch          # pip install separately on the LOQ; backbone.py falls back to resnet50

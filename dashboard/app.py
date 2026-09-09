@@ -11,6 +11,7 @@ Run:  python -m streamlit run dashboard/app.py --client.toolbarMode minimal
 
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 
@@ -39,21 +40,46 @@ RC = {"well_mixed": AQUA, "barrier_layer_stratified": INK,
 MC = {"oceanembed": AQUA, "baseline": INK,
       "oceanembed_lp05": "#8FB4CB", "oceanembed_lp30": "#C0CAD0"}
 
+# Material Symbols glyphs by name -> Unicode codepoint (matches the self-hosted
+# 21-glyph subset). Used instead of ligatures, which need the full font.
+_ICON_CP = {
+    "blur_on": "", "dashboard": "", "satellite_alt": "",
+    "waves": "", "water": "", "stacked_line_chart": "",
+    "scatter_plot": "", "grid_view": "", "compare_arrows": "",
+    "balance": "", "timeline": "", "science": "", "info": "",
+    "sailing": "", "tune": "", "code": "", "monitoring": "",
+    "description": "", "query_stats": "", "open_in_new": "",
+    "north_east": "",
+}
+
+
+def _ic(name):
+    """<span> carrying the icon glyph (falls back to the raw name if unknown)."""
+    return f'<span class="material-symbols-rounded">{_ICON_CP.get(name, name)}</span>'
+
+
 st.set_page_config(page_title="OceanEmbed", layout="wide", page_icon="🛰️",
                    initial_sidebar_state="expanded")
 
 st.markdown(
     '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
     '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
-    'family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">'
-    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
     'family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">',
     unsafe_allow_html=True)
 
-st.markdown("""
+# Material Symbols is self-hosted (21-glyph subset, ~2.8 KB woff2) so the icons
+# never depend on a Google Fonts round-trip — see dashboard/prep_iconfont.py.
+_ICON_B64 = (
+    "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"
+)
+st.markdown(
+    "<style>@font-face{font-family:'Material Symbols Rounded';font-style:normal;"
+    "font-weight:400;src:url(data:font/woff2;base64," + _ICON_B64 +
+    ") format('woff2')}</style>", unsafe_allow_html=True)
+
+st.markdown(r"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 .material-symbols-rounded { font-family:'Material Symbols Rounded'; font-weight:normal; font-style:normal;
   line-height:1; letter-spacing:normal; text-transform:none; display:inline-block; white-space:nowrap;
   word-wrap:normal; direction:ltr; -webkit-font-feature-settings:'liga'; -webkit-font-smoothing:antialiased;
@@ -80,7 +106,7 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   width:3.7rem !important; min-width:3.7rem !important; max-width:3.7rem !important;
   background:#0D0D0D !important; border-radius:24px !important; padding:1rem .55rem !important;
   margin:0 !important; }
-.st-key-oe_nav::before { content:"blur_on"; font-family:'Material Symbols Rounded';
+.st-key-oe_nav::before { content:"\e3a5"; font-family:'Material Symbols Rounded';
   -webkit-font-feature-settings:'liga'; font-feature-settings:'liga';
   display:flex; align-items:center; justify-content:center; width:2.6rem; height:2.6rem;
   margin:0 auto .8rem; border-radius:13px; background:#6FC0F5; color:#FFF; font-size:22px; }
@@ -106,16 +132,16 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .st-key-oe_nav div[role="radiogroup"] > label::before { position:relative; z-index:2;
   font-family:'Material Symbols Rounded';
   -webkit-font-feature-settings:'liga'; font-feature-settings:'liga'; color:#FFFFFF; font-size:22px; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(1)::before { content:"dashboard"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(2)::before { content:"satellite_alt"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(3)::before { content:"water"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(4)::before { content:"stacked_line_chart"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(5)::before { content:"scatter_plot"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(6)::before { content:"grid_view"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(7)::before { content:"balance"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(8)::before { content:"timeline"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(9)::before { content:"science"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(10)::before { content:"info"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(1)::before { content:"\e871"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(2)::before { content:"\eb3a"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(3)::before { content:"\f084"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(4)::before { content:"\f22b"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(5)::before { content:"\e268"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(6)::before { content:"\e9b0"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(7)::before { content:"\eaf6"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(8)::before { content:"\e922"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(9)::before { content:"\ea4b"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(10)::before { content:"\e88e"; }
 @media (max-width:1100px){ .st-key-oe_nav{ position:static !important; width:auto !important;
     max-width:none !important; transform:none !important; max-height:none !important;
     flex-direction:row; padding:.5rem; }
@@ -128,8 +154,28 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   color:#0D0D0D; margin-bottom:.9rem; }
 .oe-brand .material-symbols-rounded { font-size:24px; }
 .oe-h1 { font-weight:700; font-size:2.7rem; line-height:1.05; letter-spacing:-1.3px;
-  color:#0D0D0D; margin:0 0 1.1rem; }
+  color:#0D0D0D; margin:0 0 .8rem; }
 .oe-h1 .hl { background:#6FC0F5; border-radius:11px; padding:0 .26rem; box-decoration-break:clone; }
+.oe-sub { max-width:53rem; font-size:.92rem; line-height:1.55; color:#5A6B75; margin:0 0 1.4rem; }
+.oe-sub b { color:#0D0D0D; } .oe-sub i { font-style:italic; color:#3E7CA0; }
+
+/* ---- home-only intro / "how to read this" ---- */
+.oe-intro { border:1.5px solid #C1D5E3; border-radius:22px; background:#FFF;
+  box-shadow:0 6px 18px -8px rgba(20,52,82,.18); padding:1.3rem 1.5rem; margin:.2rem 0 1.6rem; }
+.oe-intro h4 { font-family:'Space Grotesk',sans-serif; font-size:.95rem; font-weight:600;
+  color:#0D0D0D; margin:0 0 .55rem; display:flex; align-items:center; gap:.45rem; }
+.oe-intro h4 .material-symbols-rounded { font-size:18px; color:#3E7CA0; }
+.oe-intro p { font-size:.86rem; line-height:1.55; color:#5A6B75; margin:0 0 .7rem; }
+.oe-intro p:last-child { margin-bottom:0; }
+.oe-intro b { color:#0D0D0D; font-weight:600; }
+.oe-intro .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:.7rem; margin-top:.9rem; }
+.oe-intro .steps > div { border:1px solid #DCE7EE; border-radius:14px; padding:.7rem .8rem;
+  background:#F7FAFC; }
+.oe-intro .steps .n { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.8rem;
+  color:#6FC0F5; }
+.oe-intro .steps .h { font-weight:600; font-size:.8rem; color:#0D0D0D; margin:.15rem 0; }
+.oe-intro .steps .d { font-size:.74rem; line-height:1.45; color:#8093A0; }
+@media (max-width:820px){ .oe-intro .steps { grid-template-columns:1fr; } }
 
 /* ---- pill tab bar (model / holdout / variable only) ---- */
 :is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) div[role="radiogroup"] {
@@ -227,6 +273,48 @@ hr { border-color:#DCE7EE; }
   box-shadow:0 5px 14px -7px rgba(20,52,82,.18); }
 [data-testid="stExpander"] summary { font-size:.8rem; }
 [data-testid="stDataFrame"] { border-radius:12px; }
+
+/* ================= phone layout (<=640px) ================= */
+@media (max-width:640px){
+  .stApp,[data-testid="stMain"]{ background:#C6D7E3 !important; }
+  [data-testid="stMainBlockContainer"]{ padding:.9rem .8rem 2rem !important;
+    border-radius:16px !important; margin:.4rem !important;
+    box-shadow:0 8px 22px -12px rgba(0,0,0,.28) !important; }
+  .oe-h1{ font-size:1.7rem; letter-spacing:-.4px; margin-bottom:.55rem; }
+  .oe-sub{ font-size:.84rem; line-height:1.5; margin-bottom:1rem; }
+  .oe-brand{ width:2.2rem; height:2.2rem; border-radius:11px; margin-bottom:.55rem; }
+  .oe-brand .material-symbols-rounded{ font-size:19px; }
+  .oe-topright{ position:static !important; justify-content:flex-end; margin:0 0 .5rem !important;
+    gap:.4rem; }
+  .oe-topright .pill{ padding:.4rem .68rem; font-size:.72rem; }
+  .oe-topright .ico{ width:2rem; height:2rem; }
+  /* stack every column row */
+  [data-testid="stHorizontalBlock"]{ flex-wrap:wrap !important; gap:.7rem !important; }
+  [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]{
+    flex:1 1 100% !important; width:100% !important; min-width:0 !important; }
+  [data-testid="stHorizontalBlock"]:has(.st-key-oe_model) > [data-testid="stColumn"]:first-child{
+    display:none !important; }
+  .oe-ctllab{ text-align:left !important; margin:.35rem 0 -.2rem; }
+  :is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) div[role="radiogroup"]{
+    flex-wrap:wrap !important; }
+  .oe-card.hero{ min-height:0 !important; }
+  .oe-card .val{ font-size:2.2rem; }
+  .oe-card{ padding:1rem 1.1rem; }
+  .oe-intro{ padding:1rem 1.05rem; }
+  .oe-sec .t{ font-size:1.15rem; }
+  /* nav rail -> sticky top strip */
+  [data-testid="stApp"] .st-key-oe_nav{ position:sticky !important; top:.4rem !important;
+    left:0 !important; inset:auto !important; transform:none !important;
+    width:100% !important; min-width:0 !important; max-width:100% !important;
+    max-height:none !important; overflow-x:auto !important; overflow-y:hidden !important;
+    flex-direction:row !important; padding:.4rem .45rem !important; border-radius:14px !important;
+    margin-bottom:.7rem !important; }
+  .st-key-oe_nav::before{ display:none !important; }
+  .st-key-oe_nav div[role="radiogroup"]{ flex-direction:row !important; flex-wrap:nowrap !important;
+    gap:.12rem !important; }
+  .st-key-oe_nav div[role="radiogroup"] > label{ width:2.3rem !important; height:2.3rem !important;
+    flex:none !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -234,8 +322,7 @@ hr { border-color:#DCE7EE; }
 # ---- helpers ----------------------------------------------------------- #
 def sec(anchor, icon, title, hint=""):
     st.markdown(f'<div id="{anchor}" class="oe-anchor"></div>'
-                f'<div class="oe-sec"><div class="ic">'
-                f'<span class="material-symbols-rounded">{icon}</span></div>'
+                f'<div class="oe-sec"><div class="ic">{_ic(icon)}</div>'
                 f'<div class="t">{title}</div><div class="h"></div>'
                 f'<div class="hint">{hint}</div></div>', unsafe_allow_html=True)
 
@@ -259,10 +346,32 @@ def mini(lab, val):
 
 
 def link_card(icon, title, desc):
-    return (f'<div class="oe-link"><div class="ic">'
-            f'<span class="material-symbols-rounded">{icon}</span></div><div>'
+    return (f'<div class="oe-link"><div class="ic">{_ic(icon)}</div><div>'
             f'<div class="tt">{title}</div><div class="ds">{desc}</div></div>'
-            f'<div class="ar"><span class="material-symbols-rounded">north_east</span></div></div>')
+            f'<div class="ar">{_ic("north_east")}</div></div>')
+
+
+# two-sided standard-normal quantiles for the headline interval levels
+_Z = {0.68: 0.9945, 0.80: 1.2816, 0.90: 1.6449, 0.95: 1.9600}
+
+
+def calib(pred, var):
+    """Interval-calibration diagnostics for 'T' or 'S' from a predictions bundle.
+
+    Uses the model's predicted std: a nominal-c interval is  mean +/- z(c)*std.
+    Well-calibrated  ->  empirical coverage tracks the nominal level.
+    """
+    m = pred["mask"] > 0
+    err = np.abs(pred[f"{var}_pred"][m] - pred[f"{var}_obs"][m])
+    sd = np.maximum(pred[f"{var}_std"][m], 1e-9)
+    picp = {c: float(np.mean(err <= z * sd)) for c, z in _Z.items()}
+    sharp = {c: float(np.mean(2.0 * z * sd)) for c, z in _Z.items()}
+    zs = np.linspace(0.15, 2.7, 20)
+    nominal = np.array([math.erf(z / math.sqrt(2)) for z in zs])
+    empirical = np.array([float(np.mean(err <= z * sd)) for z in zs])
+    ece = float(np.mean(np.abs(empirical - nominal)))          # calibration error
+    return dict(picp=picp, sharp=sharp, nominal=nominal, empirical=empirical,
+                ece=ece, n=int(m.sum()))
 
 
 def style_fig(fig, h=270, legend_top=True):
@@ -344,7 +453,7 @@ PAGES = [
     ("s1", "satellite_alt", "Satellite input fields"),
     ("s2", "waves", "Subsurface reconstruction"),
     ("s3", "stacked_line_chart", "Skill by depth"),
-    ("s4", "scatter_plot", "Predicted vs observed"),
+    ("s4", "scatter_plot", "Accuracy & calibration"),
     ("s5", "grid_view", "Regime overlay"),
     ("s6", "compare_arrows", "OceanEmbed vs baseline"),
     ("s7", "timeline", "Training dynamics"),
@@ -376,12 +485,18 @@ _MLABEL = {"baseline": "baseline", "oceanembed": "OceanEmbed",
 st.markdown(
     '<div class="oe-topright">'
     '<a class="ico" href="https://github.com/Specter842/oceanembed/blob/main/RUN.md" '
-    'target="_blank" title="How to run"><span class="material-symbols-rounded">tune</span></a>'
+    f'target="_blank" title="How to run">{_ic("tune")}</a>'
     '<a class="pill" href="https://github.com/Specter842/oceanembed" target="_blank">'
-    '<span class="material-symbols-rounded">code</span>View source</a></div>'
-    '<div class="oe-brand"><span class="material-symbols-rounded">sailing</span></div>'
+    f'{_ic("code")}View source</a></div>'
+    f'<div class="oe-brand">{_ic("sailing")}</div>'
     '<div class="oe-h1">Reconstructing the Ocean Interior<br>'
-    'from the <span class="hl">Surface</span> Alone</div>', unsafe_allow_html=True)
+    'from the <span class="hl">Surface</span> Alone</div>'
+    '<div class="oe-sub">Satellites map the ocean <i>surface</i> everywhere; the '
+    'temperature and salinity <i>below</i> are measured only by a sparse scatter of '
+    'drifting Argo floats. <b>OceanEmbed</b> learns the link — it takes surface fields '
+    '(SST, sea-surface height, salinity) and reconstructs the full vertical '
+    'temperature &amp; salinity profile to 2000&nbsp;m, for the Bay&nbsp;of&nbsp;Bengal '
+    '/ North Indian Ocean.</div>', unsafe_allow_html=True)
 
 rc = st.columns([2.4, 0.5, 2.0, 0.6, 1.05], vertical_alignment="center")
 rc[1].markdown('<div class="oe-ctllab">model</div>', unsafe_allow_html=True)
@@ -416,6 +531,30 @@ def need_pred():
 
 # ======================================================================== #
 if page == "home":
+    st.markdown(
+        f'<div class="oe-intro"><h4>{_ic("info")} What this is</h4>'
+        '<p>Subsurface temperature and salinity drive fisheries, cyclone intensity and the '
+        'monsoon, but are sampled far more sparsely than the surface. OceanEmbed is a '
+        '<b>proof-of-concept reconstruction model</b> that predicts the full 0&ndash;2000&nbsp;m '
+        'profile from surface satellite fields, for a basin most published work skips.</p>'
+        '<p>It is <b>not a new algorithm</b> &mdash; it combines three methods that each already '
+        'work, and applies them to the Bay of Bengal barrier-layer regime with an honest, '
+        'held-out evaluation and a like-for-like baseline.</p>'
+        '<div class="steps">'
+        '<div><div class="n">01</div><div class="h">Transfer learning</div>'
+        '<div class="d">a pretrained image backbone, adapted to satellite channels.</div></div>'
+        '<div><div class="n">02</div><div class="h">Regime conditioning</div>'
+        '<div class="d">the profile decoder is modulated by ocean regime, derived only from '
+        'climatology + river flow &mdash; never the satellite inputs.</div></div>'
+        '<div><div class="n">03</div><div class="h">Physics-consistency loss</div>'
+        '<div class="d">training penalises density inversions (TEOS-10).</div></div>'
+        '</div>'
+        '<p style="margin-top:.9rem">Use the <b>left rail</b> to switch views; the '
+        '<b>MODEL</b> / <b>HOLDOUT</b> toggles above apply to every panel. '
+        '<b>spatial</b> = Bay of Bengal held out entirely; <b>temporal</b> = the 2022 '
+        'monsoon held out. Numbers below are a preliminary CPU run &mdash; see Data &amp; scope.</p>'
+        '</div>', unsafe_allow_html=True)
+
     rt = pooled(model, holdout, "barrier_layer_stratified", "rmse_T")
     rb = pooled("baseline", holdout, "barrier_layer_stratified", "rmse_T")
     rr = pooled(model, holdout, "barrier_layer_stratified", "r_T")
@@ -446,11 +585,14 @@ if page == "home":
         f'<div class="unit">Pearson r  ·  predicted vs Argo temperature</div>'
         f'<div class="oe-insight">{_ins}</div></div>', unsafe_allow_html=True)
 
+    cov80 = calib(pred, "T")["picp"][0.80] * 100 if pred is not None else None
     m = st.columns(4)
     m[0].markdown(mini("weekly satellite fields", f"{len(weeks)}"), unsafe_allow_html=True)
-    m[1].markdown(mini("depth range", "0–2000 m"), unsafe_allow_html=True)
+    m[1].markdown(mini("depth range", "0–2000 m · 18 levels"), unsafe_allow_html=True)
     m[2].markdown(mini(f"{holdout} holdout · n", f"{n_ho}"), unsafe_allow_html=True)
-    m[3].markdown(mini("standard depth levels", "18"), unsafe_allow_html=True)
+    m[3].markdown(mini("80% interval covers · T",
+                       f"{cov80:.0f}%" if cov80 is not None else "—"),
+                  unsafe_allow_html=True)
 
     sec("home", "monitoring", "At a glance",
         f"{model} · {holdout} holdout — open any panel from the rail for detail")
@@ -615,10 +757,10 @@ elif page == "s3":
         col.plotly_chart(style_fig(f, h=340), use_container_width=True)
 
 
-# ---- 4 · predicted vs observed ------------------------------------- #
+# ---- 4 · accuracy & calibration ----------------------------------- #
 elif page == "s4":
     need_pred()
-    sec("s4", "scatter_plot", "Predicted vs observed",
+    sec("s4", "scatter_plot", "Accuracy & calibration",
         f"all {len(pts)} holdout profiles · {model}")
     gg = st.columns(2)
     for col, pk_, ok_, lab, cc in [(gg[0], "T_pred", "T_obs", "temperature °C", INK),
@@ -639,6 +781,41 @@ elif page == "s4":
                                           font=dict(color="#0D0D0D", size=14,
                                                     family="Space Grotesk"))])
         col.plotly_chart(style_fig(f, h=340, legend_top=False), use_container_width=True)
+
+    st.markdown('<div class="oe-sec" style="margin:1.8rem 0 .4rem">'
+                f'<div class="ic">{_ic("balance")}</div>'
+                '<div class="t">Is the uncertainty honest?</div><div class="h"></div>'
+                '<div class="hint">does a claimed X% interval actually contain the truth '
+                'X% of the time</div></div>', unsafe_allow_html=True)
+
+    cT, cS = calib(pred, "T"), calib(pred, "S")
+    kc = st.columns(4)
+    for c, (lv_, cd, unit) in zip(kc, [(0.80, cT, "°C"), (0.95, cT, "°C"),
+                                       (0.80, cS, "PSU"), (0.95, cS, "PSU")]):
+        vn = "T" if unit == "°C" else "S"
+        emp = cd["picp"][lv_] * 100
+        c.markdown(mini(f"{vn} · {int(lv_*100)}% interval covers",
+                        f"{emp:.0f}%  <span style='font-size:.7rem;color:#8FA0AB'>"
+                        f"(±{cd['sharp'][lv_]/2:.2f} {unit})</span>"), unsafe_allow_html=True)
+
+    rc4 = st.columns(2)
+    for col, cd, vn, cc in [(rc4[0], cT, "temperature", INK), (rc4[1], cS, "salinity", "#7FA8C6")]:
+        f = go.Figure()
+        f.add_trace(go.Scatter(x=[0, 1], y=[0, 1], line=dict(color="#AAB7C0", dash="dash", width=1),
+                               name="perfect", hoverinfo="skip"))
+        f.add_trace(go.Scatter(x=cd["nominal"], y=cd["empirical"], mode="lines+markers",
+                               line=dict(color=cc, width=2.5), marker=dict(size=5),
+                               name="observed"))
+        f.update_layout(height=300, xaxis=dict(title="claimed coverage", range=[0, 1]),
+                        yaxis=dict(title="actual coverage", range=[0, 1]),
+                        annotations=[dict(x=.05, y=.9, xref="paper", yref="paper", showarrow=False,
+                                          text=f"{vn} · mean gap {cd['ece']*100:.1f} pts",
+                                          font=dict(color="#0D0D0D", size=12,
+                                                    family="Space Grotesk"))])
+        col.plotly_chart(style_fig(f, h=300), use_container_width=True)
+    st.caption("Predicted-std intervals. A point on the dashed line = a band that is neither "
+               "over- nor under-confident. Above the line = intervals too wide; below = too "
+               "narrow (over-confident).")
 
 
 # ---- 5 · regime overlay ------------------------------------------- #
