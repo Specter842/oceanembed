@@ -12,13 +12,14 @@ Run:  python -m streamlit run dashboard/app.py --client.toolbarMode minimal
 from __future__ import annotations
 
 import math
+import subprocess
 import sys
-import time
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -95,8 +96,9 @@ st.markdown(r"""
   background:#E4EEF5; border-radius:30px; max-width:1440px; position:relative;
   padding:1.5rem 3rem 3rem 5.3rem !important; margin:.75rem auto 1.4rem;
   box-shadow:0 24px 60px -20px rgba(0,0,0,.30); scroll-behavior:smooth;
-  animation:oe-page .2s ease-out; }
-@keyframes oe-page { from { opacity:.55; transform:translateY(3px); } to { opacity:1; transform:none; } }
+  animation:oe-page .34s cubic-bezier(.22,.68,.24,1); }
+@keyframes oe-page { from { opacity:0; transform:translateY(14px) scale(.992); }
+  60% { opacity:1; } to { opacity:1; transform:none; } }
 /* the top CSS/<link> injections render as empty rows — pull them out of the
    flex flow so they add no gap (position:absolute keeps their <style> live;
    display:none would not) */
@@ -121,8 +123,8 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
    (the real markdown text stays hidden — it lives in an absolutely-positioned
    wrapper that overlaps the icon when revealed) */
 [data-testid="stApp"] .st-key-oe_nav:hover {
-  width:18rem !important; min-width:18rem !important; max-width:18rem !important;
-  padding:1.1rem .7rem !important; box-shadow:0 24px 58px -14px rgba(0,0,0,.55); }
+  width:19.5rem !important; min-width:19.5rem !important; max-width:19.5rem !important;
+  padding:1.2rem .75rem !important; box-shadow:0 24px 58px -14px rgba(0,0,0,.55); }
 .st-key-oe_nav:hover div[role="radiogroup"] { align-items:stretch !important; gap:.3rem; }
 .st-key-oe_nav:hover div[role="radiogroup"] > label { width:100% !important; height:3.1rem !important;
   justify-content:flex-start !important; padding:0 .7rem !important; overflow:visible !important; }
@@ -209,11 +211,10 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   border-bottom:2px solid #6FC0F5; padding-bottom:.35rem; }
 .oe-splash .lines { max-width:33rem; font-size:.96rem; line-height:1.7; color:#5A6B75; }
 .oe-splash .lines b { color:#0D0D0D; font-weight:600; }
-.oe-splash .enter { display:inline-flex; align-items:baseline; gap:.45rem; margin-top:2rem;
-  background:#0D0D0D; color:#F3F8FC; text-decoration:none; font-weight:600; font-size:.85rem;
-  padding:.62rem 1.1rem; border-radius:12px; transition:transform .12s, background .12s; }
+.oe-splash .enter { display:inline-flex; align-items:center; margin-top:2.1rem;
+  background:#0D0D0D; color:#F3F8FC; text-decoration:none; font-weight:600; font-size:.92rem;
+  padding:.75rem 1.5rem; border-radius:13px; transition:transform .12s, background .12s; }
 .oe-splash .enter:hover { background:#242424; transform:translateY(-1px); }
-.oe-splash .enter .oe-arr { font-size:1.05rem; line-height:1; font-weight:400; }
 .oe-splash .meta { margin-top:1.8rem; font-size:.68rem; text-transform:uppercase;
   letter-spacing:1.5px; color:#8FA0AB; }
 
@@ -404,6 +405,75 @@ hr { border-color:#DCE7EE; }
 """, unsafe_allow_html=True)
 
 
+# ---- click-to-zoom lightbox for every chart (one-time parent-doc setup) --- #
+_LIGHTBOX_JS = r"""
+<script>
+(function () {
+  var doc;
+  try { doc = window.parent.document; } catch (e) { return; }
+  if (!doc || doc.__oeLightbox) return;
+  doc.__oeLightbox = true;
+
+  var css = doc.createElement('style');
+  css.textContent =
+    '#oe-lb{position:fixed;inset:0;z-index:100000;display:none;align-items:center;'
+    + 'justify-content:center;background:rgba(9,23,38,.74);opacity:0;transition:opacity .2s ease}'
+    + '#oe-lb.on{display:flex;opacity:1}'
+    + '#oe-lb .oe-lb-box{background:#fff;border-radius:20px;padding:1.4rem;position:relative;'
+    + 'box-shadow:0 50px 120px -24px rgba(0,0,0,.55);transform:scale(.93);'
+    + 'transition:transform .22s cubic-bezier(.2,.7,.2,1)}'
+    + '#oe-lb.on .oe-lb-box{transform:scale(1)}'
+    + '#oe-lb .oe-lb-x{position:absolute;top:-.9rem;right:-.9rem;width:2.3rem;height:2.3rem;'
+    + 'border-radius:50%;border:none;background:#0D0D0D;color:#fff;font-size:1.2rem;cursor:pointer;'
+    + 'box-shadow:0 8px 20px -6px rgba(0,0,0,.5)}'
+    + '.stPlotlyChart{cursor:zoom-in}';
+  doc.head.appendChild(css);
+
+  var lb = doc.createElement('div');
+  lb.id = 'oe-lb';
+  lb.innerHTML = '<div class="oe-lb-box"><button class="oe-lb-x" aria-label="close">&times;</button>'
+               + '<div class="oe-lb-slot"></div></div>';
+  doc.body.appendChild(lb);
+  var slot = lb.querySelector('.oe-lb-slot');
+
+  function close() {
+    lb.classList.remove('on');
+    doc.documentElement.style.overflow = '';
+    setTimeout(function () { slot.innerHTML = ''; }, 220);
+  }
+  lb.addEventListener('click', function (e) { if (!e.target.closest('.oe-lb-box')) close(); });
+  lb.querySelector('.oe-lb-x').addEventListener('click', close);
+  doc.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+  doc.body.addEventListener('click', function (e) {
+    if (lb.classList.contains('on')) return;
+    var chart = e.target.closest('.stPlotlyChart');
+    if (!chart || e.target.closest('.modebar') || e.target.closest('a')) return;
+    var svgc = chart.querySelector('.svg-container');
+    if (!svgc) return;
+    var w = svgc.offsetWidth || 620, h = svgc.offsetHeight || 380;
+    var maxW = Math.min(doc.documentElement.clientWidth * 0.9 - 110, 1160);
+    var maxH = doc.documentElement.clientHeight * 0.82 - 110;
+    var s = Math.max(1, Math.min(maxW / w, maxH / h, 2.4));
+    var clone = svgc.cloneNode(true);
+    clone.querySelectorAll('.modebar-container, .modebar, .modebar-group, .modebar-btn')
+         .forEach(function (m) { m.remove(); });
+    clone.style.transform = 'scale(' + s + ')';
+    clone.style.transformOrigin = 'top left';
+    var wrap = doc.createElement('div');
+    wrap.style.cssText = 'width:' + Math.ceil(w * s) + 'px;height:' + Math.ceil(h * s) + 'px;overflow:hidden';
+    wrap.appendChild(clone);
+    slot.innerHTML = '';
+    slot.appendChild(wrap);
+    lb.classList.add('on');
+    doc.documentElement.style.overflow = 'hidden';
+  }, true);
+})();
+</script>
+"""
+components.html(_LIGHTBOX_JS, height=0)
+
+
 # ---- helpers ----------------------------------------------------------- #
 def sec(anchor, icon, title, hint=""):
     st.markdown(f'<div id="{anchor}" class="oe-anchor"></div>'
@@ -550,6 +620,66 @@ def regime_map(A, month):
     return g, A["regime_grid_lat"], A["regime_grid_lon"]
 
 
+def run_pipeline():
+    """Build all dashboard inputs in this process's Python environment."""
+    stages = [
+        ("Prepare matched profile data", [sys.executable, "-m", "src.data_pipeline", "--patch", "32"]),
+        ("Train baseline and OceanEmbed", [sys.executable, "-m", "src.train", "--models", "both"]),
+        ("Evaluate both holdouts", [sys.executable, "-m", "src.evaluate"]),
+        ("Build dashboard assets", [sys.executable, "-m", "dashboard.prep_assets"]),
+    ]
+    log = st.empty()
+    lines = []
+    progress = st.progress(0.0)
+    try:
+        for index, (label, command) in enumerate(stages, start=1):
+            with st.status(f"{label}…", expanded=True) as status:
+                process = subprocess.Popen(
+                    command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                    text=True, encoding="utf-8", errors="replace",
+                )
+                for output in process.stdout or []:
+                    lines.append(output.rstrip())
+                    log.code("\n".join(lines[-24:]), language="text")
+                if process.wait() != 0:
+                    status.update(label=f"{label} failed", state="error")
+                    raise RuntimeError(f"Pipeline stopped during: {label}")
+                status.update(label=f"{label} complete", state="complete")
+            progress.progress(index / len(stages))
+    except OSError as exc:
+        raise RuntimeError(f"Could not start the pipeline: {exc}") from exc
+
+
+# A Streamlit session is deliberately the only state that permits charts to be
+# displayed. A new browser session always starts here; no cached artefact is
+# shown until this session has generated a new one.
+if st.query_params.get("run_pipeline") == "1":
+    st.session_state.pop("oe_pipeline_ready", None)
+    del st.query_params["run_pipeline"]
+
+if not st.session_state.get("oe_pipeline_ready", False):
+    st.markdown(
+        '<div class="oe-splash"><div class="mark">🛰️</div><h1>OceanEmbed</h1>'
+        '<div class="tag">Reading the ocean’s interior from its surface</div>'
+        '<div class="lines">This session begins without saved charts or metrics. '
+        'Run the pipeline to prepare the data, train the models, evaluate the holdouts, '
+        'and generate a fresh dashboard.</div></div>',
+        unsafe_allow_html=True,
+    )
+    if st.button("▸  Run Pipeline", type="primary", key="oe_run_pipeline"):
+        try:
+            run_pipeline()
+        except RuntimeError as exc:
+            st.error(str(exc))
+            st.info("Install the full dependencies with `pip install -r requirements-pipeline.txt` "
+                    "and ensure the source data is available, then try again.")
+        else:
+            st.cache_data.clear()
+            st.session_state["oe_pipeline_ready"] = True
+            st.rerun()
+    st.stop()
+
+
 # ---- navigation rail = the sidebar (in-place) ----------------------- #
 PAGES = [
     ("about", "sailing", "OceanEmbed"),
@@ -683,8 +813,7 @@ if page == "about":
         'cannot see &mdash; for the <b>Bay of Bengal</b>, using only what they can.'
         '<br><br>It is a proof of concept, evaluated honestly on held-out data. '
         'Not a deployed service, and not a claim to a new algorithm.</div>'
-        '<a class="enter" href="?view=home" target="_self">Enter the dashboard'
-        '<span class="oe-arr">&rarr;</span></a>'
+        '<a class="enter" href="?run_pipeline=1" target="_self">Run pipeline again</a>'
         '<div class="meta">SIH &middot; MoES &middot; North Indian Ocean</div>'
         '</div>', unsafe_allow_html=True)
 
@@ -1109,36 +1238,11 @@ elif page == "s5":
                              "github.com/Specter842/oceanembed — code, docs, RUN.md."),
                    unsafe_allow_html=True)
 
-    subsec("timeline", "Re-run the pipeline")
-    _STAGES = [
-        ("Fetch Argo + satellite  ·  weekly, 2021–2023", 0.4,
-         "cached  ·  10,962 QC’d Argo profiles  ·  157 weekly satellite composites"),
-        ("Match profiles → 0.25° grid, cut the holdouts", 0.9,
-         "8,340 matched  ·  Bay of Bengal + JJAS-2022 physically withheld"),
-        ("Train baseline  ·  ResNet-18, 20 epochs, CPU", 1.5,
-         "≈ 2m50s wall  ·  ~8s/epoch  ·  best val RMSE·T 1.054 °C"),
-        ("Train OceanEmbed  ·  + FiLM + physics-consistency loss", 1.6,
-         "≈ 3m00s wall  ·  best val RMSE·T 1.003 °C"),
-        ("λ-physics sweep  ·  0.05 / 0.10 / 0.30", 0.7,
-         "identical to 3 dp — the physics term is idle at this data scale"),
-        ("Evaluate  ·  spatial + temporal holdouts", 1.0,
-         "per-regime RMSE, interval calibration, TEOS-10 diagnostics written"),
-    ]
-    if st.button("▸  Re-run the full pipeline", type="primary", key="oe_rerun"):
-        bar = st.progress(0.0)
-        for i, (name, secs, note) in enumerate(_STAGES):
-            slot = st.empty()
-            slot.markdown(f"&nbsp;&nbsp;◦&nbsp; {name} …")
-            time.sleep(secs)
-            slot.markdown(f"&nbsp;&nbsp;✓&nbsp; **{name}**  \n"
-                          f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:#8FA0AB;font-size:.82rem'>{note}</span>",
-                          unsafe_allow_html=True)
-            bar.progress((i + 1) / len(_STAGES))
-        st.cache_data.clear()
-        st.success("Pipeline finished — every panel is reloaded from the fresh metrics.")
-        time.sleep(0.8)
-        st.rerun()
-    st.caption("Replays the recorded training run, then reloads the metrics from disk. The "
-               "hosted demo has no GPU so it cannot train live — the numbers shown are the "
-               "real output of `python -m src.evaluate` from the last run. To run it for "
-               "real, clone the repo and follow RUN.md.")
+    subsec("timeline", "Run the pipeline again")
+    st.markdown(
+        '<a class="enter" href="?run_pipeline=1" target="_self">Run Pipeline</a>',
+        unsafe_allow_html=True,
+    )
+    st.caption("This returns to the fresh-session start screen and runs the actual matching, "
+               "training, evaluation, and dashboard-asset build commands. It does not replay "
+               "pre-recorded progress or reuse charts from this session.")
