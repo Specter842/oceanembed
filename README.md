@@ -168,12 +168,15 @@ Details: [`outputs/metrics/PHASE3_FINDINGS.md`](outputs/metrics/PHASE3_FINDINGS.
 ## Run it
 
 ```bash
+# dashboard only (what's deployed):
 pip install -r requirements.txt
-# data pipeline is already built; to rebuild see RUN.md
+streamlit run dashboard/app.py
+
+# full pipeline (rebuild data / retrain / re-evaluate):
+pip install -r requirements-pipeline.txt
 python -m src.train --models both --backbone resnet50 --epochs 40   # on a GPU box
 python -m src.evaluate
 python -m src.viz.plots
-streamlit run dashboard/app.py
 ```
 
 `pytest -q` runs the regime-independence and split-integrity checks.

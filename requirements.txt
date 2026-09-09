@@ -1,45 +1,13 @@
-# OceanEmbed — dependencies
+# OceanEmbed — dashboard runtime (Phase 4).
 #
-# Python: target was 3.11 (CLAUDE.md §1); actual env is 3.14 — flagged, low risk.
-#   All of the below install on 3.14. `argopy` does NOT (its aiohttp dep has no
-#   3.14 wheel + no build toolchain here) — not needed; we use erddapy / raw
-#   ERDDAP against AOML instead.
+# This is the ONLY thing the Streamlit demo needs. It reads pre-baked
+# artefacts (dashboard/assets.npz + outputs/metrics/*.csv / *.npz) and never
+# imports torch / xarray / netCDF4 / gsw, so the deploy stays small and fast.
 #
-# GPU: this PC has no CUDA (Intel Iris Xe) so torch here is the CPU build.
-#   On the Lenovo LOQ install the CUDA build instead — see RUN.md.
+# To rebuild data, train, or evaluate, use requirements-pipeline.txt instead
+# (adds xarray, netCDF4, torch, gsw, erddapy, …) — see RUN.md.
 
-# --- data access + pipeline ---
-numpy
-pandas
-scipy
-xarray
-netCDF4
-h5netcdf
-h5py
-pyarrow
-requests
-erddapy
-pydap
-python-dateutil
-
-# --- modelling ---
-torch                 # CPU build here; `--index-url .../cu124` on the LOQ (RUN.md)
-torchvision
-gsw                   # TEOS-10 — regime climatology + physics diagnostics
-
-# --- evaluation + viz ---
-matplotlib
-
-# --- dashboard (Phase 4) ---
-streamlit
-plotly
-
-# --- optional: Prithvi-EO geospatial backbone (§5.1) ---
-# terratorch          # pip install separately on the LOQ; backbone.py falls back to resnet50
-
-# --- optional / not used ---
-# xesmf               # conda-only on Windows; nearest-neighbour regrid in xarray suffices
-# huggingface_hub     # pulled in by terratorch when Prithvi is used
-
-# --- dev ---
-pytest
+streamlit==1.63.0     # pinned: the dashboard CSS targets this version's DOM
+plotly>=5.24
+pandas>=2.0
+numpy>=1.26

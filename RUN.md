@@ -13,8 +13,11 @@ Everything is CPU/GPU-agnostic; `src/train.py` auto-detects CUDA and turns on AM
 ```bash
 python -m venv .venv
 .venv/Scripts/activate            # Windows;  source .venv/bin/activate on Linux
-pip install -r requirements.txt
+pip install -r requirements-pipeline.txt   # data + training + eval
 ```
+
+Just want to run the dashboard? `pip install -r requirements.txt` (streamlit +
+plotly + pandas + numpy only) — it reads the baked artefacts, nothing else.
 
 On the LOQ, install the CUDA build of torch instead of the CPU one:
 
