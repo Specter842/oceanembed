@@ -93,11 +93,16 @@ st.markdown(r"""
 [data-testid="stAppViewBlockContainer"] { padding-top:0 !important; }
 [data-testid="stMainBlockContainer"] {
   background:#E4EEF5; border-radius:30px; max-width:1440px; position:relative;
-  padding:1.35rem 2.3rem 3rem 7rem !important; margin:.75rem auto 1.4rem;
+  padding:1.5rem 3rem 3rem 5.3rem !important; margin:.75rem auto 1.4rem;
   box-shadow:0 24px 60px -20px rgba(0,0,0,.30); scroll-behavior:smooth;
-}
-/* the top-of-page CSS/link injections render as empty flex rows — shrink the gap */
-[data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"] { gap:.6rem; }
+  animation:oe-page .2s ease-out; }
+@keyframes oe-page { from { opacity:.55; transform:translateY(3px); } to { opacity:1; transform:none; } }
+/* the top CSS/<link> injections render as empty rows — pull them out of the
+   flex flow so they add no gap (position:absolute keeps their <style> live;
+   display:none would not) */
+[data-testid="stMainBlockContainer"] [data-testid="stElementContainer"]:has(> [data-testid="stMarkdown"] style),
+[data-testid="stMainBlockContainer"] [data-testid="stElementContainer"]:has(> [data-testid="stMarkdown"] link) {
+  position:absolute !important; height:0 !important; overflow:hidden !important; }
 html { scroll-behavior:smooth; }
 html, body, [class*="css"], p, span, div, label, .stMarkdown { font-family:'Inter',system-ui,sans-serif; color:#111; }
 h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
@@ -112,19 +117,26 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   width:3.7rem !important; min-width:3.7rem !important; max-width:3.7rem !important;
   background:#0D0D0D !important; border-radius:24px !important; padding:1rem .55rem !important;
   margin:0 !important; transition:width .17s ease, min-width .17s ease, max-width .17s ease; }
-/* hover the rail -> it widens and every icon shows its page name */
+/* hover the rail -> it widens; each icon gets its page name via ::after
+   (the real markdown text stays hidden — it lives in an absolutely-positioned
+   wrapper that overlaps the icon when revealed) */
 [data-testid="stApp"] .st-key-oe_nav:hover {
-  width:14.5rem !important; min-width:14.5rem !important; max-width:14.5rem !important;
-  box-shadow:0 22px 54px -14px rgba(0,0,0,.55); }
-.st-key-oe_nav:hover div[role="radiogroup"] { align-items:stretch !important; }
-.st-key-oe_nav:hover div[role="radiogroup"] > label { width:100% !important;
-  justify-content:flex-start !important; padding-left:.5rem !important; overflow:visible !important; }
-.st-key-oe_nav:hover div[role="radiogroup"] > label::before { margin-right:.7rem; }
-.st-key-oe_nav:hover div[role="radiogroup"] > label [data-testid="stMarkdownContainer"] {
-  display:block !important; position:relative; z-index:2; }
-.st-key-oe_nav:hover div[role="radiogroup"] > label [data-testid="stMarkdownContainer"] p {
-  margin:0 !important; color:#F3F8FC; font-size:.8rem; font-weight:500; white-space:nowrap;
-  font-family:'Space Grotesk','Inter',sans-serif; }
+  width:18rem !important; min-width:18rem !important; max-width:18rem !important;
+  padding:1.1rem .7rem !important; box-shadow:0 24px 58px -14px rgba(0,0,0,.55); }
+.st-key-oe_nav:hover div[role="radiogroup"] { align-items:stretch !important; gap:.3rem; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label { width:100% !important; height:3.1rem !important;
+  justify-content:flex-start !important; padding:0 .7rem !important; overflow:visible !important; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label::before { flex:none; font-size:25px !important; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label::after {
+  position:relative; z-index:2; margin-left:.85rem; color:#F3F8FC; white-space:nowrap;
+  font:500 .95rem/1 'Space Grotesk','Inter',sans-serif; letter-spacing:-.1px; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label:nth-of-type(1)::after { content:"OceanEmbed"; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label:nth-of-type(2)::after { content:"Overview"; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label:nth-of-type(3)::after { content:"Inputs & reconstruction"; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label:nth-of-type(4)::after { content:"Accuracy & calibration"; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label:nth-of-type(5)::after { content:"Regime overlay"; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label:nth-of-type(6)::after { content:"Model vs baseline"; }
+.st-key-oe_nav:hover div[role="radiogroup"] > label:nth-of-type(7)::after { content:"Data & scope"; }
 /* keep the real radio input out of the way (label click still selects it) */
 .st-key-oe_nav div[role="radiogroup"] > label > span:first-child {
   position:absolute !important; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
@@ -183,7 +195,8 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 
 /* ---- about / splash view (reached from the brand mark) ---- */
 .oe-splash { min-height:66vh; display:flex; flex-direction:column; align-items:center;
-  justify-content:center; text-align:center; padding:3rem 1rem 2rem; }
+  justify-content:center; text-align:center; padding:3rem 1rem 2rem;
+  margin:0 -3rem 0 -5.3rem; }  /* cancel the panel's asymmetric padding so this centres in the panel */
 .oe-splash .mark { width:5.4rem; height:5.4rem; border-radius:26px; background:#0D0D0D;
   display:flex; align-items:center; justify-content:center; margin-bottom:1.7rem;
   box-shadow:0 20px 44px -16px rgba(20,52,82,.4); transition:transform .12s; text-decoration:none; }
@@ -196,11 +209,11 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   border-bottom:2px solid #6FC0F5; padding-bottom:.35rem; }
 .oe-splash .lines { max-width:33rem; font-size:.96rem; line-height:1.7; color:#5A6B75; }
 .oe-splash .lines b { color:#0D0D0D; font-weight:600; }
-.oe-splash .enter { display:inline-flex; align-items:center; gap:.4rem; margin-top:2rem;
+.oe-splash .enter { display:inline-flex; align-items:baseline; gap:.45rem; margin-top:2rem;
   background:#0D0D0D; color:#F3F8FC; text-decoration:none; font-weight:600; font-size:.85rem;
-  padding:.6rem 1.1rem; border-radius:12px; transition:.12s; }
-.oe-splash .enter:hover { background:#242424; }
-.oe-splash .enter .material-symbols-rounded { font-size:16px; }
+  padding:.62rem 1.1rem; border-radius:12px; transition:transform .12s, background .12s; }
+.oe-splash .enter:hover { background:#242424; transform:translateY(-1px); }
+.oe-splash .enter .oe-arr { font-size:1.05rem; line-height:1; font-weight:400; }
 .oe-splash .meta { margin-top:1.8rem; font-size:.68rem; text-transform:uppercase;
   letter-spacing:1.5px; color:#8FA0AB; }
 
@@ -298,7 +311,17 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .oe-mini .val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.4rem; color:#0D0D0D; margin-top:.15rem; }
 
 .stPlotlyChart { background:#FFF; border:1.5px solid #C1D5E3; border-radius:22px; padding:.5rem .3rem;
-  box-shadow:0 6px 18px -8px rgba(20,52,82,.20); }
+  box-shadow:0 6px 18px -8px rgba(20,52,82,.20); position:relative; }
+/* plotly modebar — expand / zoom / download; softly visible, full on hover */
+.stPlotlyChart .modebar-container { top:.35rem !important; right:.55rem !important; }
+.stPlotlyChart .modebar { opacity:.5; transition:opacity .15s; }
+.stPlotlyChart:hover .modebar { opacity:1; }
+.stPlotlyChart .modebar-group { background:transparent !important; margin-left:.15rem !important; }
+.stPlotlyChart .modebar-btn svg { fill:#7C8B96 !important; }
+.stPlotlyChart .modebar-btn:hover svg { fill:#0D0D0D !important; }
+/* per-page description under the section title */
+.oe-pdesc { max-width:47rem; font-size:.86rem; line-height:1.55; color:#5A6B75; margin:-.35rem 0 1.15rem; }
+.oe-pdesc b { color:#0D0D0D; }
 .stRadio label[data-testid], .stSlider label, .stSelectbox label {
   color:#8B98A2 !important; font-size:.7rem !important; letter-spacing:.6px; text-transform:uppercase; font-weight:600; }
 [data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"] { background:#0D0D0D; }
@@ -312,8 +335,8 @@ hr { border-color:#DCE7EE; }
 .oe-link .ic .material-symbols-rounded { font-size:18px; }
 .oe-link .tt { font-weight:600; font-size:.9rem; color:#0D0D0D; }
 .oe-link .ds { font-size:.74rem; color:#8FA0AB; margin-top:.15rem; line-height:1.4; }
-.oe-link .ar { margin-left:auto; color:#AAB7C0; flex:none; display:flex; }
-.oe-link .ar .material-symbols-rounded { font-size:18px; }
+.oe-link .ar { margin-left:auto; color:#AAB7C0; flex:none; font-size:1.1rem; line-height:1; }
+.oe-link:hover .ar { color:#0D0D0D; }
 [data-testid="stExpander"] { border:1.5px solid #C1D5E3; border-radius:16px; background:#FFF;
   box-shadow:0 5px 14px -7px rgba(20,52,82,.18); }
 [data-testid="stExpander"] summary { font-size:.8rem; }
@@ -340,6 +363,8 @@ hr { border-color:#DCE7EE; }
   [data-testid="stMainBlockContainer"]{ padding:.9rem .8rem 2rem !important;
     border-radius:16px !important; margin:.4rem !important;
     box-shadow:0 8px 22px -12px rgba(0,0,0,.28) !important; }
+  .oe-splash{ margin:0 !important; padding:2rem .5rem !important; }
+  .oe-splash h1{ font-size:2.4rem !important; }
   .oe-h1{ font-size:1.7rem; letter-spacing:-.4px; margin-bottom:.55rem; }
   .oe-sub{ font-size:.84rem; line-height:1.5; margin-bottom:1rem; }
   .oe-brand{ width:2.2rem; height:2.2rem; border-radius:11px; margin-bottom:.55rem; }
@@ -394,6 +419,11 @@ def subsec(icon, title):
                 f'<div class="h"></div></div>', unsafe_allow_html=True)
 
 
+def pdesc(text):
+    """One-line 'what's on this page' blurb, under the section title."""
+    st.markdown(f'<p class="oe-pdesc">{text}</p>', unsafe_allow_html=True)
+
+
 def domino(pct, n=10):
     f = int(round(np.clip(pct, 0, 1) * n))
     return ('<div class="oe-dom">'
@@ -415,7 +445,7 @@ def mini(lab, val):
 def link_card(icon, title, desc):
     return (f'<div class="oe-link"><div class="ic">{_ic(icon)}</div><div>'
             f'<div class="tt">{title}</div><div class="ds">{desc}</div></div>'
-            f'<div class="ar">{_ic("north_east")}</div></div>')
+            f'<div class="ar">&#8599;</div></div>')
 
 
 # two-sided standard-normal quantiles for the headline interval levels
@@ -439,6 +469,12 @@ def calib(pred, var):
     ece = float(np.mean(np.abs(empirical - nominal)))          # calibration error
     return dict(picp=picp, sharp=sharp, nominal=nominal, empirical=empirical,
                 ece=ece, n=int(m.sum()))
+
+
+# plotly modebar: give every chart a visible expand / zoom / download control
+_CHART_CFG = {"displayModeBar": True, "displaylogo": False,
+             "modeBarButtonsToRemove": ["lasso2d", "select2d", "toImage"],
+             "responsive": True}
 
 
 def style_fig(fig, h=270, legend_top=True):
@@ -571,13 +607,13 @@ if page != "about":
         'temperature &amp; salinity profile to 2000&nbsp;m, for the Bay&nbsp;of&nbsp;Bengal '
         '/ North Indian Ocean.</div>', unsafe_allow_html=True)
 
-    rc = st.columns([2.4, 0.5, 2.0, 0.6, 1.05], vertical_alignment="center")
-    rc[1].markdown('<div class="oe-ctllab">model</div>', unsafe_allow_html=True)
-    model = rc[2].radio("model", models, horizontal=True, key="oe_model",
+    rc = st.columns([0.5, 2.0, 0.62, 1.05, 2.6], vertical_alignment="center")
+    rc[0].markdown('<div class="oe-ctllab">model</div>', unsafe_allow_html=True)
+    model = rc[1].radio("model", models, horizontal=True, key="oe_model",
                         format_func=lambda m: _MLABEL.get(m, m), label_visibility="collapsed",
                         index=models.index("oceanembed") if "oceanembed" in models else 0)
-    rc[3].markdown('<div class="oe-ctllab">holdout</div>', unsafe_allow_html=True)
-    holdout = rc[4].radio("holdout", ["spatial", "temporal"], horizontal=True,
+    rc[2].markdown('<div class="oe-ctllab">holdout</div>', unsafe_allow_html=True)
+    holdout = rc[3].radio("holdout", ["spatial", "temporal"], horizontal=True,
                           key="oe_holdout", label_visibility="collapsed",
                           help="spatial = Bay of Bengal block · temporal = JJAS 2022")
 else:
@@ -647,8 +683,8 @@ if page == "about":
         'cannot see &mdash; for the <b>Bay of Bengal</b>, using only what they can.'
         '<br><br>It is a proof of concept, evaluated honestly on held-out data. '
         'Not a deployed service, and not a claim to a new algorithm.</div>'
-        '<a class="enter" href="?view=home" target="_self">Enter the dashboard '
-        f'{_ic("north_east")}</a>'
+        '<a class="enter" href="?view=home" target="_self">Enter the dashboard'
+        '<span class="oe-arr">&rarr;</span></a>'
         '<div class="meta">SIH &middot; MoES &middot; North Indian Ocean</div>'
         '</div>', unsafe_allow_html=True)
 
@@ -741,7 +777,7 @@ elif page == "home":
         ov[0].markdown('<div class="oe-mini" style="margin-bottom:.4rem">'
                        '<div class="lab">OceanEmbed vs baseline · RMSE·T by regime</div></div>',
                        unsafe_allow_html=True)
-        ov[0].plotly_chart(style_fig(f, h=280), use_container_width=True)
+        ov[0].plotly_chart(style_fig(f, h=280), use_container_width=True, config=_CHART_CFG)
 
     # skill by depth — RMSE_T, barrier-layer, current holdout
     if metrics is not None:
@@ -759,7 +795,7 @@ elif page == "home":
         ov[1].markdown('<div class="oe-mini" style="margin-bottom:.4rem">'
                        '<div class="lab">error vs depth · barrier-layer regime</div></div>',
                        unsafe_allow_html=True)
-        ov[1].plotly_chart(style_fig(f, h=280), use_container_width=True)
+        ov[1].plotly_chart(style_fig(f, h=280), use_container_width=True, config=_CHART_CFG)
 
     ov2 = st.columns(2)
     # predicted vs observed T
@@ -781,7 +817,7 @@ elif page == "home":
         ov2[0].markdown('<div class="oe-mini" style="margin-bottom:.4rem">'
                         '<div class="lab">predicted vs observed temperature</div></div>',
                         unsafe_allow_html=True)
-        ov2[0].plotly_chart(style_fig(f, h=270, legend_top=False), use_container_width=True)
+        ov2[0].plotly_chart(style_fig(f, h=270, legend_top=False), use_container_width=True, config=_CHART_CFG)
 
     # training curves — val RMSE_T
     if logs:
@@ -794,7 +830,7 @@ elif page == "home":
         ov2[1].markdown('<div class="oe-mini" style="margin-bottom:.4rem">'
                         '<div class="lab">training — validation RMSE·T per epoch</div></div>',
                         unsafe_allow_html=True)
-        ov2[1].plotly_chart(style_fig(f, h=270), use_container_width=True)
+        ov2[1].plotly_chart(style_fig(f, h=270), use_container_width=True, config=_CHART_CFG)
 
     sec("headline", "balance", "Headline — temperature RMSE by regime",
         "pooled over depth · lower is better · the barrier-layer row is the project's target")
@@ -812,6 +848,11 @@ elif page == "home":
 # ---- 1 · inputs & reconstruction ------------------------------------- #
 elif page == "s1":
     sec("s1", "satellite_alt", "Inputs & reconstruction")
+    pdesc("<b>Top:</b> the three surface fields the model reads for a chosen week — "
+          "sea-surface temperature, height and salinity. <b>Bottom:</b> pick any held-out "
+          "Argo float on the map and see the temperature &amp; salinity profile the model "
+          "reconstructs for it (0–2000&nbsp;m), against the real Argo cast, with a &plusmn;2&sigma; "
+          "uncertainty band and the per-depth residual.")
     wk = st.select_slider("week", [d.strftime("%Y-%m-%d") for d in weeks],
                           value=weeks[min(len(weeks) - 1, 86)].strftime("%Y-%m-%d"))
     wi = [d.strftime("%Y-%m-%d") for d in weeks].index(wk)
@@ -823,7 +864,7 @@ elif page == "s1":
     g = st.columns(3)
     for col, var, lab in zip(g, ("sst", "ssh", "sss"), ("SST °C", "SLA m", "SSS PSU")):
         col.plotly_chart(heat(A[f"sat_{var}"][wi], LON, LAT, sc[var], lab),
-                         use_container_width=True)
+                         use_container_width=True, config=_CHART_CFG)
 
     need_pred()
     subsec("waves", "Reconstructed profile — click a float")
@@ -832,7 +873,7 @@ elif page == "s1":
         fm = px.scatter(pts, x="lon", y="lat", color="regime", color_discrete_map=RC,
                         custom_data=["i"])
         fm.update_traces(marker=dict(size=7, line=dict(width=0)))
-        ev = st.plotly_chart(style_fig(fm, h=390), use_container_width=True,
+        ev = st.plotly_chart(style_fig(fm, h=390), use_container_width=True, config=_CHART_CFG,
                              on_select="rerun", key="pmap")
         pk = ev.get("selection", {}).get("points", []) if ev else []
         idx = int(pk[0]["customdata"][0]) if pk else (176 if len(pts) > 176 else 0)
@@ -860,7 +901,7 @@ elif page == "s1":
         fig.update_layout(height=390, yaxis=dict(title="depth m", autorange="reversed"),
                           xaxis=dict(title="T °C", domain=[0, 1]),
                           xaxis2=dict(title="S PSU", overlaying="x", side="top"))
-        st.plotly_chart(style_fig(fig, h=390), use_container_width=True)
+        st.plotly_chart(style_fig(fig, h=390), use_container_width=True, config=_CHART_CFG)
     resid = (P["T_pred"] - P["T_obs"])[mk]
     rt_i = float(np.sqrt(np.mean((P["T_pred"][mk] - P["T_obs"][mk]) ** 2)))
     rs_i = float(np.sqrt(np.mean((P["S_pred"][mk] - P["S_obs"][mk]) ** 2)))
@@ -868,7 +909,7 @@ elif page == "s1":
                           marker_cornerradius=6))
     rf.update_layout(height=150, xaxis_title="depth m", yaxis_title="T resid °C", bargap=.55)
     c1, c2 = st.columns([3, 1])
-    c1.plotly_chart(style_fig(rf, h=150, legend_top=False), use_container_width=True)
+    c1.plotly_chart(style_fig(rf, h=150, legend_top=False), use_container_width=True, config=_CHART_CFG)
     c2.markdown(mini("this profile RMSE·T", f"{rt_i:.2f} °C"), unsafe_allow_html=True)
     c2.markdown(mini("RMSE·S", f"{rs_i:.2f} PSU"), unsafe_allow_html=True)
 
@@ -877,6 +918,10 @@ elif page == "s1":
 elif page == "s2":
     need_pred()
     sec("s2", "scatter_plot", "Accuracy & calibration")
+    pdesc("How well the reconstruction matches withheld Argo. <b>Skill by depth</b> — RMSE "
+          "per level in the barrier-layer regime, model vs baseline. <b>Predicted vs "
+          "observed</b> — every held-out point, T and S. <b>Is the uncertainty honest?</b> — "
+          "whether a claimed X% interval actually contains the truth X% of the time.")
     subsec("stacked_line_chart", "Skill by depth — barrier-layer regime")
     d = metrics[(metrics.test_set == holdout) & (metrics.depth_level >= 0)
                 & (metrics.regime_class == "barrier_layer_stratified")
@@ -891,7 +936,7 @@ elif page == "s2":
                                    mode="lines+markers", marker=dict(size=5)))
         f.update_layout(height=340, xaxis_title=lab,
                         yaxis=dict(title="depth m", autorange="reversed"))
-        col.plotly_chart(style_fig(f, h=340), use_container_width=True)
+        col.plotly_chart(style_fig(f, h=340), use_container_width=True, config=_CHART_CFG)
 
     subsec("scatter_plot", "Predicted vs observed")
     gg = st.columns(2)
@@ -912,7 +957,7 @@ elif page == "s2":
                                           text=f"r = {r:.3f}", showarrow=False,
                                           font=dict(color="#0D0D0D", size=14,
                                                     family="Space Grotesk"))])
-        col.plotly_chart(style_fig(f, h=340, legend_top=False), use_container_width=True)
+        col.plotly_chart(style_fig(f, h=340, legend_top=False), use_container_width=True, config=_CHART_CFG)
 
     subsec("balance", "Is the uncertainty honest?")
     cT, cS = calib(pred, "T"), calib(pred, "S")
@@ -939,12 +984,17 @@ elif page == "s2":
                                           text=f"{vn} · mean gap {cd['ece']*100:.1f} pts",
                                           font=dict(color="#0D0D0D", size=12,
                                                     family="Space Grotesk"))])
-        col.plotly_chart(style_fig(f, h=300), use_container_width=True)
+        col.plotly_chart(style_fig(f, h=300), use_container_width=True, config=_CHART_CFG)
 
 
 # ---- 3 · regime overlay ------------------------------------------- #
 elif page == "s3":
     sec("s3", "grid_view", "Regime overlay")
+    pdesc("The ocean-regime map that <i>conditions</i> the model (well-mixed / barrier-layer / "
+          "upwelling), by month. It is derived only from WOA23 climatology and river discharge "
+          "&mdash; <b>never</b> the satellite inputs &mdash; so it can't leak the answer. Side "
+          "panels: Bay-of-Bengal barrier-layer / mixed-layer depth and the regime mix of the "
+          "current holdout.")
     mo = st.slider("month", 1, 12, 8)
     L2, R2 = st.columns([1.4, 1])
     with L2:
@@ -955,7 +1005,7 @@ elif page == "s3":
         f.update_layout(coloraxis_colorbar=dict(
             tickvals=[0, 1, 2], ticktext=["mixed", "barrier", "upwell"],
             thickness=7, len=0.8, tickfont=dict(size=8, color="#8FA0AB")))
-        st.plotly_chart(style_fig(f, h=360), use_container_width=True)
+        st.plotly_chart(style_fig(f, h=360), use_container_width=True, config=_CHART_CFG)
     with R2:
         clat, clon = A["clim_lat"], A["clim_lon"]
         my = (clat >= 5) & (clat <= 22)
@@ -967,18 +1017,22 @@ elif page == "s3":
         f = go.Figure(go.Bar(x=["BLT m", "MLD m", "strat×50"], y=[blt, mld, strat * 50],
                              marker_color=[INK, "#7FA8C6", AQUA], marker_cornerradius=8))
         f.update_layout(height=165, yaxis_title="Bay of Bengal mean", bargap=.5)
-        st.plotly_chart(style_fig(f, h=165, legend_top=False), use_container_width=True)
+        st.plotly_chart(style_fig(f, h=165, legend_top=False), use_container_width=True, config=_CHART_CFG)
         if pred is not None:
             vc = pd.Series(regnames).value_counts().reindex(REGIMES, fill_value=0)
             f = go.Figure(go.Bar(y=vc.index, x=vc.values, orientation="h",
                                  marker_color=[RC[r] for r in vc.index], marker_cornerradius=8))
             f.update_layout(height=165, xaxis_title=f"{holdout} holdout profiles", bargap=.45)
-            st.plotly_chart(style_fig(f, h=165, legend_top=False), use_container_width=True)
+            st.plotly_chart(style_fig(f, h=165, legend_top=False), use_container_width=True, config=_CHART_CFG)
 
 
 # ---- 4 · model vs baseline ------------------------------------- #
 elif page == "s4":
     sec("s4", "compare_arrows", "Model vs baseline")
+    pdesc("Does the regime-conditioned, physics-constrained model beat a plain baseline trained "
+          "the same way? <b>Per-regime RMSE</b> for both holdouts (T or S), the full table, "
+          "<b>training curves</b> for every run, and the <b>physics check</b> &mdash; the rate "
+          "of density inversions in the predicted profiles (TEOS-10).")
     if metrics is not None:
         var = st.radio("variable", ["rmse_T", "rmse_S"], horizontal=True, key="oe_var",
                        format_func=lambda s: "Temperature" if s.endswith("T") else "Salinity")
@@ -991,7 +1045,7 @@ elif page == "s4":
         f.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1].upper(),
                                                  font=dict(size=10, color="#8FA0AB")))
         f.update_layout(height=380)
-        st.plotly_chart(style_fig(f, h=380), use_container_width=True)
+        st.plotly_chart(style_fig(f, h=380), use_container_width=True, config=_CHART_CFG)
         with st.expander("full table — per test set × regime"):
             st.dataframe(pool[pool.regime_class.isin(REGIMES + ["all"])]
                          .pivot_table(index=["test_set", "regime_class"], columns="model",
@@ -1007,7 +1061,7 @@ elif page == "s4":
                 f.add_trace(go.Scatter(x=v.epoch, y=v[yv], name=name,
                                        line=dict(color=MC.get(name, "#AAB7C0"), width=2)))
             f.update_layout(height=320, xaxis_title="epoch", yaxis_title=lab)
-            col.plotly_chart(style_fig(f, h=320), use_container_width=True)
+            col.plotly_chart(style_fig(f, h=320), use_container_width=True, config=_CHART_CFG)
     else:
         st.info("no training logs found")
 
@@ -1019,7 +1073,7 @@ elif page == "s4":
             f.add_trace(go.Bar(name=ts, x=s.model, y=s.inversion_fraction * 100,
                                marker_color=cc, marker_cornerradius=10))
         f.update_layout(height=300, barmode="group", yaxis_title="% inverted level pairs")
-        st.plotly_chart(style_fig(f, h=300), use_container_width=True)
+        st.plotly_chart(style_fig(f, h=300), use_container_width=True, config=_CHART_CFG)
         st.caption("≈ 0 for every model — profiles are already density-stable, so the "
                    "physics loss term has little to correct at this data scale.")
 
@@ -1027,6 +1081,10 @@ elif page == "s4":
 # ---- 5 · data & scope ----------------------------------------- #
 elif page == "s5":
     sec("s5", "info", "Data & scope")
+    pdesc("Exactly what this build runs on and what it doesn't: every satellite / Argo / "
+          "climatology source and the substitutions made, what stayed out of scope (INCOIS "
+          "buoys, real-time ingestion, float-deployment advice), links to the Phase-0 and "
+          "Phase-3 write-ups, and a step-by-step replay of the training pipeline.")
     st.markdown(
         '<div class="oe-card" style="border-radius:20px;border-left:3px solid #6FC0F5;">'
         'This demo runs on <b>historical downloaded satellite and Argo data</b>. Real-time '
