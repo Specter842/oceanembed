@@ -31,7 +31,7 @@ METRICS = ROOT / "outputs" / "metrics"
 FOG = "#A7C4D6"          # muted slate backdrop
 CREAM = "#F3F8FC"
 INK = "#0D0D0D"
-AQUA = "#6FC0F5"         # ocean-blue accent
+AQUA = "#4AA0DC"         # ocean-blue accent (deeper, for depth)
 MUTE = "#8B98A2"
 HAIR = "#DCE7EE"
 
@@ -117,7 +117,7 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   transition:.12s; overflow:hidden; flex:none !important; }
 .st-key-oe_nav div[role="radiogroup"] > label:hover { background:#242424; }
 /* the native radio circle (eqiohyi4) is the active indicator: Streamlit paints it
-   #6FC0F5 when checked, rgba(13,13,13,.2) (invisible on the #0D0D0D rail) otherwise.
+   #4AA0DC when checked, rgba(13,13,13,.2) (invisible on the #0D0D0D rail) otherwise.
    Blow it up to fill the cell — no :has()/nth-of-type, so it never lags on rerun. */
 .st-key-oe_nav div[role="radiogroup"] > label > div { position:absolute !important; inset:0 !important;
   display:block !important; padding:0 !important; margin:0 !important; }
@@ -147,14 +147,14 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   .st-key-oe_nav::before{ display:none; } }
 
 /* ---- display heading ---- */
-.oe-brand { width:2.7rem; height:2.7rem; border-radius:14px; background:#6FC0F5;
+.oe-brand { width:2.7rem; height:2.7rem; border-radius:14px; background:#4AA0DC;
   display:flex; align-items:center; justify-content:center; cursor:pointer;
-  color:#0D0D0D; margin-bottom:.9rem; transition:transform .12s; text-decoration:none; }
+  color:#FFFFFF; margin-bottom:.9rem; transition:transform .12s; text-decoration:none; }
 .oe-brand:hover { transform:translateY(-1px); }
 .oe-brand .material-symbols-rounded { font-size:24px; }
 .oe-h1 { font-weight:700; font-size:2.7rem; line-height:1.05; letter-spacing:-1.3px;
   color:#0D0D0D; margin:0 0 .8rem; }
-.oe-h1 .hl { background:#6FC0F5; border-radius:11px; padding:0 .26rem; box-decoration-break:clone; }
+.oe-h1 .hl { background:#4AA0DC; color:#FFFFFF; border-radius:11px; padding:0 .26rem; box-decoration-break:clone; }
 .oe-sub { max-width:53rem; font-size:.92rem; line-height:1.55; color:#5A6B75; margin:0 0 1.4rem; }
 .oe-sub b { color:#0D0D0D; } .oe-sub i { font-style:italic; color:#3E7CA0; }
 
@@ -165,12 +165,12 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   display:flex; align-items:center; justify-content:center; margin-bottom:1.7rem;
   box-shadow:0 20px 44px -16px rgba(20,52,82,.4); transition:transform .12s; text-decoration:none; }
 .oe-splash .mark:hover { transform:translateY(-2px); }
-.oe-splash .mark .material-symbols-rounded { font-size:50px; color:#6FC0F5; }
+.oe-splash .mark .material-symbols-rounded { font-size:50px; color:#4AA0DC; }
 .oe-splash h1 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:3.5rem;
   letter-spacing:-1.6px; color:#0D0D0D; margin:0 0 .5rem; }
 .oe-splash .tag { font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:500;
   color:#3E7CA0; letter-spacing:-.2px; margin:0 0 1.7rem;
-  border-bottom:2px solid #6FC0F5; padding-bottom:.35rem; }
+  border-bottom:2px solid #4AA0DC; padding-bottom:.35rem; }
 .oe-splash .lines { max-width:33rem; font-size:.96rem; line-height:1.7; color:#5A6B75; }
 .oe-splash .lines b { color:#0D0D0D; font-weight:600; }
 .oe-splash .enter { display:inline-flex; align-items:center; gap:.4rem; margin-top:2rem;
@@ -194,7 +194,7 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .oe-intro .steps > div { border:1px solid #DCE7EE; border-radius:14px; padding:.7rem .8rem;
   background:#F7FAFC; }
 .oe-intro .steps .n { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.8rem;
-  color:#6FC0F5; }
+  color:#4AA0DC; }
 .oe-intro .steps .h { font-weight:600; font-size:.8rem; color:#0D0D0D; margin:.15rem 0; }
 .oe-intro .steps .d { font-size:.74rem; line-height:1.45; color:#8093A0; }
 @media (max-width:820px){ .oe-intro .steps { grid-template-columns:1fr; } }
@@ -246,7 +246,7 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   padding:1.15rem 1.3rem; height:100%;
   box-shadow:0 6px 18px -8px rgba(20,52,82,.22); }
 .oe-card.hero { min-height:12.5rem; display:flex; flex-direction:column; }
-.oe-card.lime { background:#FFF; border-color:#6FC0F5; border-width:2px; }
+.oe-card.lime { background:#FFF; border-color:#4AA0DC; border-width:2px; }
 .oe-card.lime .val { color:#2C7AB0; }
 .oe-card.ink  { background:#0D0D0D; border-color:#333B41; }
 .oe-card .lab { font-size:.72rem; font-weight:600; letter-spacing:.6px; text-transform:uppercase; color:#8FA0AB; }
@@ -258,24 +258,24 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .oe-card.ink .unit { color:#8A8A8A; }
 .oe-badge { display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem; font-weight:600;
   background:#0D0D0D; color:#F3F8FC; border-radius:999px; padding:.16rem .5rem; }
-.oe-card.ink .oe-badge { background:#6FC0F5; color:#0D0D0D; }
+.oe-card.ink .oe-badge { background:#4AA0DC; color:#0D0D0D; }
 .oe-dom { display:flex; gap:.34rem; margin-top:1rem; }
 .oe-dom i { flex:1; height:13px; border-radius:4px; }
 .oe-dom i.f { background:#0D0D0D; }
-.oe-card.lime .oe-dom i.f { background:#6FC0F5; }
-.oe-card.ink .oe-dom i.f { background:#6FC0F5; }
+.oe-card.lime .oe-dom i.f { background:#4AA0DC; }
+.oe-card.ink .oe-dom i.f { background:#4AA0DC; }
 .oe-dom i.e { border:1.5px dashed #BDCAD3; }
 .oe-card.ink .oe-dom i.e { border-color:#333; }
 .oe-insight { margin-top:auto; padding-top:.9rem; font-size:.8rem; line-height:1.45; color:#AFC0CC; }
-.oe-insight b { color:#6FC0F5; }
+.oe-insight b { color:#4AA0DC; }
 .oe-mini { background:#FFF; border:1.5px solid #C1D5E3; border-radius:18px; padding:.85rem 1rem; height:100%;
   box-shadow:0 5px 14px -7px rgba(20,52,82,.20); }
 .oe-mini .lab { font-size:.66rem; font-weight:600; letter-spacing:.5px; text-transform:uppercase; color:#8FA0AB; }
 .oe-mini .val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.4rem; color:#0D0D0D; margin-top:.15rem; }
-.oe-mini.blue { background:#6FC0F5; border-color:#54AEE6; }
-.oe-mini.blue .lab { color:rgba(13,13,13,.62); }
-.oe-mini.blue .val { color:#0D0D0D; }
-.oe-mini.blue .val span { color:rgba(13,13,13,.6) !important; }
+.oe-mini.blue { background:#4AA0DC; border-color:#3D8CC4; }
+.oe-mini.blue .lab { color:rgba(255,255,255,.82); }
+.oe-mini.blue .val { color:#FFFFFF; }
+.oe-mini.blue .val span { color:rgba(255,255,255,.72) !important; }
 .oe-mrow { display:grid; grid-template-columns:repeat(6,1fr); gap:.9rem; margin:.2rem 0 0; }
 .oe-mrow .oe-mini { border-radius:16px; padding:.8rem .9rem; }
 .oe-mrow .oe-mini .val { font-size:1.15rem; line-height:1.15; }
@@ -317,7 +317,7 @@ hr { border-color:#DCE7EE; }
 .oe-tbl th:nth-child(n+3), .oe-tbl td:nth-child(n+3) { text-align:right; }
 .oe-tbl tr:last-child td { border-bottom:none; }
 .oe-tbl tr.star td { background:#EAF5FD; font-weight:600; }
-.oe-tbl tr.star td:first-child { box-shadow:inset 3px 0 0 #6FC0F5; }
+.oe-tbl tr.star td:first-child { box-shadow:inset 3px 0 0 #4AA0DC; }
 .oe-tbl td.w { color:#2C7AB0; font-weight:700; }
 
 /* ================= phone layout (<=640px) ================= */
@@ -805,8 +805,8 @@ elif page == "s1":
                           value=weeks[min(len(weeks) - 1, 86)].strftime("%Y-%m-%d"))
     wi = [d.strftime("%Y-%m-%d") for d in weeks].index(wk)
     sc = {
-        "sst": [[0, "#F3F8FC"], [.5, "#6FC0F5"], [1, "#0D0D0D"]],
-        "ssh": [[0, "#0D0D0D"], [.5, "#F3F8FC"], [1, "#6FC0F5"]],
+        "sst": [[0, "#F3F8FC"], [.5, "#4AA0DC"], [1, "#0D0D0D"]],
+        "ssh": [[0, "#0D0D0D"], [.5, "#F3F8FC"], [1, "#4AA0DC"]],
         "sss": [[0, "#F3F8FC"], [.5, "#CBA24E"], [1, "#0D0D0D"]],
     }
     g = st.columns(3)
@@ -1017,7 +1017,7 @@ elif page == "s4":
 elif page == "s5":
     sec("s5", "info", "Data & scope")
     st.markdown(
-        '<div class="oe-card" style="border-radius:20px;border-left:3px solid #6FC0F5;">'
+        '<div class="oe-card" style="border-radius:20px;border-left:3px solid #4AA0DC;">'
         'This demo runs on <b>historical downloaded satellite and Argo data</b>. Real-time '
         'ingestion and the float-deployment / cyclone-flagging features in the roadmap are '
         '<b>not implemented</b> in this build.<br><br>'
