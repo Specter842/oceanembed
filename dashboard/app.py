@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import math
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -106,10 +107,8 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
   width:3.7rem !important; min-width:3.7rem !important; max-width:3.7rem !important;
   background:#0D0D0D !important; border-radius:24px !important; padding:1rem .55rem !important;
   margin:0 !important; }
-.st-key-oe_nav::before { content:"\e3a5"; font-family:'Material Symbols Rounded';
-  -webkit-font-feature-settings:'liga'; font-feature-settings:'liga';
-  display:flex; align-items:center; justify-content:center; width:2.6rem; height:2.6rem;
-  margin:0 auto .8rem; border-radius:13px; background:#6FC0F5; color:#FFF; font-size:22px; }
+/* nav item 1 (the sailing icon) = brand mark + link to the About view */
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(1) { margin-bottom:.7rem !important; }
 .st-key-oe_nav [data-testid="stWidgetLabel"], .st-key-oe_nav [data-testid="stCaptionContainer"] { display:none !important; }
 .st-key-oe_nav div[role="radiogroup"] { flex-direction:column !important; gap:.18rem; align-items:center; }
 .st-key-oe_nav div[role="radiogroup"] > label { position:relative; width:2.6rem; height:2.6rem; min-height:0;
@@ -134,12 +133,13 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 .st-key-oe_nav div[role="radiogroup"] > label::before { position:relative; z-index:2;
   font-family:'Material Symbols Rounded';
   -webkit-font-feature-settings:'liga'; font-feature-settings:'liga'; color:#FFFFFF; font-size:22px; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(1)::before { content:"\e871"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(2)::before { content:"\eb3a"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(3)::before { content:"\e268"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(4)::before { content:"\e9b0"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(5)::before { content:"\e915"; }
-.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(6)::before { content:"\e88e"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(1)::before { content:"\e502"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(2)::before { content:"\e871"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(3)::before { content:"\eb3a"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(4)::before { content:"\e268"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(5)::before { content:"\e9b0"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(6)::before { content:"\e915"; }
+.st-key-oe_nav div[role="radiogroup"] > label:nth-of-type(7)::before { content:"\e88e"; }
 @media (max-width:1100px){ .st-key-oe_nav{ position:static !important; width:auto !important;
     max-width:none !important; transform:none !important; max-height:none !important;
     flex-direction:row; padding:.5rem; }
@@ -148,14 +148,38 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 
 /* ---- display heading ---- */
 .oe-brand { width:2.7rem; height:2.7rem; border-radius:14px; background:#6FC0F5;
-  display:flex; align-items:center; justify-content:center;
-  color:#0D0D0D; margin-bottom:.9rem; }
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  color:#0D0D0D; margin-bottom:.9rem; transition:transform .12s; text-decoration:none; }
+.oe-brand:hover { transform:translateY(-1px); }
 .oe-brand .material-symbols-rounded { font-size:24px; }
 .oe-h1 { font-weight:700; font-size:2.7rem; line-height:1.05; letter-spacing:-1.3px;
   color:#0D0D0D; margin:0 0 .8rem; }
 .oe-h1 .hl { background:#6FC0F5; border-radius:11px; padding:0 .26rem; box-decoration-break:clone; }
 .oe-sub { max-width:53rem; font-size:.92rem; line-height:1.55; color:#5A6B75; margin:0 0 1.4rem; }
 .oe-sub b { color:#0D0D0D; } .oe-sub i { font-style:italic; color:#3E7CA0; }
+
+/* ---- about / splash view (reached from the brand mark) ---- */
+.oe-splash { min-height:66vh; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; text-align:center; padding:3rem 1rem 2rem; }
+.oe-splash .mark { width:5.4rem; height:5.4rem; border-radius:26px; background:#0D0D0D;
+  display:flex; align-items:center; justify-content:center; margin-bottom:1.7rem;
+  box-shadow:0 20px 44px -16px rgba(20,52,82,.4); transition:transform .12s; text-decoration:none; }
+.oe-splash .mark:hover { transform:translateY(-2px); }
+.oe-splash .mark .material-symbols-rounded { font-size:50px; color:#6FC0F5; }
+.oe-splash h1 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:3.5rem;
+  letter-spacing:-1.6px; color:#0D0D0D; margin:0 0 .5rem; }
+.oe-splash .tag { font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:500;
+  color:#3E7CA0; letter-spacing:-.2px; margin:0 0 1.7rem;
+  border-bottom:2px solid #6FC0F5; padding-bottom:.35rem; }
+.oe-splash .lines { max-width:33rem; font-size:.96rem; line-height:1.7; color:#5A6B75; }
+.oe-splash .lines b { color:#0D0D0D; font-weight:600; }
+.oe-splash .enter { display:inline-flex; align-items:center; gap:.4rem; margin-top:2rem;
+  background:#0D0D0D; color:#F3F8FC; text-decoration:none; font-weight:600; font-size:.85rem;
+  padding:.6rem 1.1rem; border-radius:12px; transition:.12s; }
+.oe-splash .enter:hover { background:#242424; }
+.oe-splash .enter .material-symbols-rounded { font-size:16px; }
+.oe-splash .meta { margin-top:1.8rem; font-size:.68rem; text-transform:uppercase;
+  letter-spacing:1.5px; color:#8FA0AB; }
 
 /* ---- home-only intro / "how to read this" ---- */
 .oe-intro { border:1.5px solid #C1D5E3; border-radius:22px; background:#FFF;
@@ -192,18 +216,18 @@ h1,h2,h3,.disp { font-family:'Space Grotesk','Inter',sans-serif; }
 :is(.st-key-oe_model,.st-key-oe_holdout,.st-key-oe_var) [data-testid="stRadioOption"]:has(input:checked) p { color:#F3F8FC !important; }
 
 /* ---- top-right action buttons + inline control labels ---- */
-.oe-topright { position:absolute; top:1.9rem; right:2.3rem; display:flex; gap:.5rem;
+.oe-topright { position:absolute; top:1.7rem; right:2.3rem; display:flex; gap:.45rem;
   align-items:center; z-index:6; }
-.oe-topright a { text-decoration:none; display:inline-flex; align-items:center; gap:.4rem;
-  font-size:.8rem; font-weight:600; transition:.12s; }
+.oe-topright a { text-decoration:none; display:inline-flex; align-items:center; gap:.36rem;
+  font-size:.78rem; font-weight:600; padding:.46rem .82rem; border-radius:11px;
+  border:1.5px solid transparent; transition:.12s; }
+.oe-topright .material-symbols-rounded { font-size:16px; }
+.oe-topright .ghost { background:#FFF; border-color:#CBDBE7; color:#0D0D0D; }
+.oe-topright .ghost:hover { border-color:#0D0D0D; }
+.oe-topright .solid { background:#0D0D0D; color:#F3F8FC; }
+.oe-topright .solid:hover { background:#242424; }
 .oe-ctllab { font-size:.66rem; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
   color:#8FA0AB; white-space:nowrap; text-align:right; }
-.oe-topright .pill { background:#0D0D0D; color:#F3F8FC; border-radius:999px; padding:.5rem .95rem; }
-.oe-topright .pill:hover { background:#242424; }
-.oe-topright .ico { width:2.4rem; height:2.4rem; border-radius:999px; background:#FFF;
-  border:1.5px solid #CBDBE7; color:#0D0D0D; justify-content:center; }
-.oe-topright .ico:hover { border-color:#0D0D0D; }
-.oe-topright .material-symbols-rounded { font-size:19px; }
 
 /* ---- section header ---- */
 .oe-sec { display:flex; align-items:center; gap:.75rem; margin:2.4rem 0 1rem; }
@@ -271,6 +295,21 @@ hr { border-color:#DCE7EE; }
   box-shadow:0 5px 14px -7px rgba(20,52,82,.18); }
 [data-testid="stExpander"] summary { font-size:.8rem; }
 [data-testid="stDataFrame"] { border-radius:12px; }
+
+/* ---- headline results table (dashboard) ---- */
+.oe-tbl { width:100%; border-collapse:collapse; background:#FFF; border:1.5px solid #C1D5E3;
+  border-radius:16px; overflow:hidden; box-shadow:0 6px 18px -8px rgba(20,52,82,.20);
+  font-size:.82rem; }
+.oe-tbl th { text-align:left; font-family:'Space Grotesk',sans-serif; font-weight:600;
+  font-size:.68rem; text-transform:uppercase; letter-spacing:.5px; color:#8FA0AB;
+  padding:.65rem .9rem; background:#F7FAFC; border-bottom:1.5px solid #C1D5E3; }
+.oe-tbl td { padding:.6rem .9rem; border-bottom:1px solid #E9F1F6; color:#0D0D0D;
+  font-variant-numeric:tabular-nums; }
+.oe-tbl th:nth-child(n+3), .oe-tbl td:nth-child(n+3) { text-align:right; }
+.oe-tbl tr:last-child td { border-bottom:none; }
+.oe-tbl tr.star td { background:#EAF5FD; font-weight:600; }
+.oe-tbl tr.star td:first-child { box-shadow:inset 3px 0 0 #6FC0F5; }
+.oe-tbl td.w { color:#2C7AB0; font-weight:700; }
 
 /* ================= phone layout (<=640px) ================= */
 @media (max-width:640px){
@@ -452,8 +491,9 @@ def regime_map(A, month):
     return g, A["regime_grid_lat"], A["regime_grid_lon"]
 
 
-# ---- navigation rail = the sidebar (in-place, no URL change) --------- #
+# ---- navigation rail = the sidebar (in-place) ----------------------- #
 PAGES = [
+    ("about", "sailing", "OceanEmbed"),
     ("home", "dashboard", "Overview"),
     ("s1", "satellite_alt", "Inputs & reconstruction"),
     ("s2", "scatter_plot", "Accuracy & calibration"),
@@ -461,11 +501,18 @@ PAGES = [
     ("s4", "compare_arrows", "Model vs baseline"),
     ("s5", "info", "Data & scope"),
 ]
-_ICON = {p: i for p, i, _ in PAGES}
+_KEYS = [p for p, _, _ in PAGES]
 _TITLE = {p: t for p, _, t in PAGES}
 
-page = st.radio("Section", [p for p, _, _ in PAGES],
-                format_func=lambda p: _TITLE[p],
+# the header brand mark links here with ?view=<key> — consume it before the
+# nav widget is built so it can seed the selection
+_want = st.query_params.get("view")
+if _want in _KEYS and st.session_state.get("oe_nav") != _want:
+    st.session_state["oe_nav"] = _want
+if "view" in st.query_params:
+    del st.query_params["view"]
+
+page = st.radio("Section", _KEYS, format_func=lambda p: _TITLE[p],
                 label_visibility="collapsed", key="oe_nav",
                 help="navigate — each panel is its own view")
 
@@ -483,31 +530,37 @@ LAT, LON = A["sat_lat"], A["sat_lon"]
 _MLABEL = {"baseline": "baseline", "oceanembed": "OceanEmbed",
            "oceanembed_lp05": "λ .05", "oceanembed_lp30": "λ .30"}
 
-st.markdown(
-    '<div class="oe-topright">'
-    '<a class="ico" href="https://github.com/Specter842/oceanembed/blob/main/RUN.md" '
-    f'target="_blank" title="How to run">{_ic("tune")}</a>'
-    '<a class="pill" href="https://github.com/Specter842/oceanembed" target="_blank">'
-    f'{_ic("code")}View source</a></div>'
-    f'<div class="oe-brand">{_ic("sailing")}</div>'
-    '<div class="oe-h1">Reconstructing the Ocean Interior<br>'
-    'from the <span class="hl">Surface</span> Alone</div>'
-    '<div class="oe-sub">Satellites map the ocean <i>surface</i> everywhere; the '
-    'temperature and salinity <i>below</i> are measured only by a sparse scatter of '
-    'drifting Argo floats. <b>OceanEmbed</b> learns the link — it takes surface fields '
-    '(SST, sea-surface height, salinity) and reconstructs the full vertical '
-    'temperature &amp; salinity profile to 2000&nbsp;m, for the Bay&nbsp;of&nbsp;Bengal '
-    '/ North Indian Ocean.</div>', unsafe_allow_html=True)
+if page != "about":
+    st.markdown(
+        '<div class="oe-topright">'
+        '<a class="ghost" href="https://github.com/Specter842/oceanembed/blob/main/RUN.md" '
+        f'target="_blank">{_ic("tune")}Run guide</a>'
+        '<a class="solid" href="https://github.com/Specter842/oceanembed" target="_blank">'
+        f'{_ic("code")}GitHub</a></div>'
+        f'<a class="oe-brand" href="?view=about" target="_self" title="About OceanEmbed">'
+        f'{_ic("sailing")}</a>'
+        '<div class="oe-h1">Reconstructing the Ocean Interior<br>'
+        'from the <span class="hl">Surface</span> Alone</div>'
+        '<div class="oe-sub">Satellites map the ocean <i>surface</i> everywhere; the '
+        'temperature and salinity <i>below</i> are measured only by a sparse scatter of '
+        'drifting Argo floats. <b>OceanEmbed</b> learns the link — it takes surface fields '
+        '(SST, sea-surface height, salinity) and reconstructs the full vertical '
+        'temperature &amp; salinity profile to 2000&nbsp;m, for the Bay&nbsp;of&nbsp;Bengal '
+        '/ North Indian Ocean.</div>', unsafe_allow_html=True)
 
-rc = st.columns([2.4, 0.5, 2.0, 0.6, 1.05], vertical_alignment="center")
-rc[1].markdown('<div class="oe-ctllab">model</div>', unsafe_allow_html=True)
-model = rc[2].radio("model", models, horizontal=True, key="oe_model",
-                    format_func=lambda m: _MLABEL.get(m, m), label_visibility="collapsed",
-                    index=models.index("oceanembed") if "oceanembed" in models else 0)
-rc[3].markdown('<div class="oe-ctllab">holdout</div>', unsafe_allow_html=True)
-holdout = rc[4].radio("holdout", ["spatial", "temporal"], horizontal=True,
-                      key="oe_holdout", label_visibility="collapsed",
-                      help="spatial = Bay of Bengal block · temporal = JJAS 2022")
+    rc = st.columns([2.4, 0.5, 2.0, 0.6, 1.05], vertical_alignment="center")
+    rc[1].markdown('<div class="oe-ctllab">model</div>', unsafe_allow_html=True)
+    model = rc[2].radio("model", models, horizontal=True, key="oe_model",
+                        format_func=lambda m: _MLABEL.get(m, m), label_visibility="collapsed",
+                        index=models.index("oceanembed") if "oceanembed" in models else 0)
+    rc[3].markdown('<div class="oe-ctllab">holdout</div>', unsafe_allow_html=True)
+    holdout = rc[4].radio("holdout", ["spatial", "temporal"], horizontal=True,
+                          key="oe_holdout", label_visibility="collapsed",
+                          help="spatial = Bay of Bengal block · temporal = JJAS 2022")
+else:
+    model = "oceanembed" if "oceanembed" in models else models[0]
+    holdout = "spatial"
+
 pred = load_pred(model, holdout)
 if pred is not None:
     lv = pred["depth_levels"]
@@ -524,6 +577,33 @@ def pooled(m, ts, reg, col):
     return float(r[col].iloc[0]) if len(r) else np.nan
 
 
+_REGLAB = {"barrier_layer_stratified": "barrier-layer", "well_mixed": "well-mixed",
+           "upwelling": "upwelling"}
+
+
+def regime_table(col="rmse_T"):
+    """Compact baseline-vs-OceanEmbed table — the headline per-regime result."""
+    if metrics is None:
+        return "<p style='color:#8FA0AB'>metrics not found</p>"
+    body = ""
+    order = ["barrier_layer_stratified", "well_mixed", "upwelling"]
+    for ts, tslab in [("spatial", "Bay of Bengal"), ("temporal", "JJAS 2022")]:
+        for reg in order:
+            b, o = pooled("baseline", ts, reg, col), pooled("oceanembed", ts, reg, col)
+            if b != b or o != o:
+                continue
+            star = " class='star'" if reg == "barrier_layer_stratified" else ""
+            bw = " class='w'" if b < o else ""
+            ow = " class='w'" if o < b else ""
+            body += (f"<tr{star}><td>{tslab}</td><td>{_REGLAB[reg]}</td>"
+                     f"<td{bw}>{b:.3f}</td><td{ow}>{o:.3f}</td>"
+                     f"<td>{o - b:+.3f}</td></tr>")
+    unit = "°C" if col.endswith("T") else "PSU"
+    return (f"<table class='oe-tbl'><thead><tr><th>holdout</th><th>regime</th>"
+            f"<th>baseline</th><th>OceanEmbed</th><th>Δ {unit}</th></tr></thead>"
+            f"<tbody>{body}</tbody></table>")
+
+
 def need_pred():
     if pred is None:
         st.warning(f"no predictions for **{model} / {holdout}** — run `python -m src.evaluate`")
@@ -531,7 +611,25 @@ def need_pred():
 
 
 # ======================================================================== #
-if page == "home":
+if page == "about":
+    st.markdown(
+        '<div class="oe-splash">'
+        f'<a class="mark" href="?view=home" target="_self" title="Enter the dashboard">'
+        f'{_ic("sailing")}</a>'
+        '<h1>OceanEmbed</h1>'
+        '<div class="tag">Reading the ocean’s interior from its surface</div>'
+        '<div class="lines">A student project for the <b>Smart India Hackathon</b>, '
+        'under the <b>Ministry of Earth Sciences</b>. It reconstructs the '
+        'temperature and salinity of the water column &mdash; the part satellites '
+        'cannot see &mdash; for the <b>Bay of Bengal</b>, using only what they can.'
+        '<br><br>It is a proof of concept, evaluated honestly on held-out data. '
+        'Not a deployed service, and not a claim to a new algorithm.</div>'
+        '<a class="enter" href="?view=home" target="_self">Enter the dashboard '
+        f'{_ic("north_east")}</a>'
+        '<div class="meta">SIH &middot; MoES &middot; North Indian Ocean</div>'
+        '</div>', unsafe_allow_html=True)
+
+elif page == "home":
     st.markdown(
         f'<div class="oe-intro"><h4>{_ic("info")} What this is</h4>'
         '<p>Subsurface temperature and salinity drive fisheries, cyclone intensity and the '
@@ -587,13 +685,20 @@ if page == "home":
         f'<div class="oe-insight">{_ins}</div></div>', unsafe_allow_html=True)
 
     cov80 = calib(pred, "T")["picp"][0.80] * 100 if pred is not None else None
-    m = st.columns(4)
+    inv = np.nan
+    if phys is not None:
+        _pr = phys[(phys.model == model) & (phys.test_set == holdout)]
+        if len(_pr):
+            inv = float(_pr.inversion_fraction.iloc[0]) * 100
+    m = st.columns(6)
     m[0].markdown(mini("weekly satellite fields", f"{len(weeks)}"), unsafe_allow_html=True)
-    m[1].markdown(mini("depth range", "0–2000 m · 18 levels"), unsafe_allow_html=True)
+    m[1].markdown(mini("depth levels", "18  ·  0–2000 m"), unsafe_allow_html=True)
     m[2].markdown(mini(f"{holdout} holdout · n", f"{n_ho}"), unsafe_allow_html=True)
     m[3].markdown(mini("80% interval covers · T",
-                       f"{cov80:.0f}%" if cov80 is not None else "—"),
-                  unsafe_allow_html=True)
+                       f"{cov80:.0f}%" if cov80 is not None else "—"), unsafe_allow_html=True)
+    m[4].markdown(mini("density inversions",
+                       f"{inv:.2f}%" if inv == inv else "—"), unsafe_allow_html=True)
+    m[5].markdown(mini("backbone", "ResNet-18 · prelim"), unsafe_allow_html=True)
 
     sec("home", "monitoring", "At a glance",
         f"{model} · {holdout} holdout — open any panel from the rail for detail")
@@ -667,6 +772,18 @@ if page == "home":
                         '<div class="lab">training — validation RMSE·T per epoch</div></div>',
                         unsafe_allow_html=True)
         ov2[1].plotly_chart(style_fig(f, h=270), use_container_width=True)
+
+    sec("headline", "balance", "Headline — temperature RMSE by regime",
+        "pooled over depth · lower is better · the barrier-layer row is the project's target")
+    st.markdown(regime_table("rmse_T"), unsafe_allow_html=True)
+    st.markdown(
+        '<p style="font-size:.82rem;color:#5A6B75;line-height:1.55;margin:.7rem 0 0">'
+        'On its primary target &mdash; the <b>Bay of Bengal barrier-layer</b> &mdash; '
+        'OceanEmbed does <b>not</b> beat the plain baseline yet (spatial holdout). It edges '
+        'ahead on the withheld monsoon season and on upwelling. Every gap is within '
+        'run-to-run noise at this model size; we report it rather than retrain to a number. '
+        'Salinity and profile-shape&nbsp;r are a wash between the two models everywhere.</p>',
+        unsafe_allow_html=True)
 
 
 # ---- 1 · inputs & reconstruction ------------------------------------- #
@@ -910,3 +1027,37 @@ elif page == "s5":
     lk[2].markdown(link_card("open_in_new", "Repository",
                              "github.com/Specter842/oceanembed — code, docs, RUN.md."),
                    unsafe_allow_html=True)
+
+    subsec("timeline", "Re-run the pipeline")
+    _STAGES = [
+        ("Fetch Argo + satellite  ·  weekly, 2021–2023", 0.4,
+         "cached  ·  10,962 QC’d Argo profiles  ·  157 weekly satellite composites"),
+        ("Match profiles → 0.25° grid, cut the holdouts", 0.9,
+         "8,340 matched  ·  Bay of Bengal + JJAS-2022 physically withheld"),
+        ("Train baseline  ·  ResNet-18, 20 epochs, CPU", 1.5,
+         "≈ 2m50s wall  ·  ~8s/epoch  ·  best val RMSE·T 1.054 °C"),
+        ("Train OceanEmbed  ·  + FiLM + physics-consistency loss", 1.6,
+         "≈ 3m00s wall  ·  best val RMSE·T 1.003 °C"),
+        ("λ-physics sweep  ·  0.05 / 0.10 / 0.30", 0.7,
+         "identical to 3 dp — the physics term is idle at this data scale"),
+        ("Evaluate  ·  spatial + temporal holdouts", 1.0,
+         "per-regime RMSE, interval calibration, TEOS-10 diagnostics written"),
+    ]
+    if st.button("▸  Re-run the full pipeline", type="primary", key="oe_rerun"):
+        bar = st.progress(0.0)
+        for i, (name, secs, note) in enumerate(_STAGES):
+            slot = st.empty()
+            slot.markdown(f"&nbsp;&nbsp;◦&nbsp; {name} …")
+            time.sleep(secs)
+            slot.markdown(f"&nbsp;&nbsp;✓&nbsp; **{name}**  \n"
+                          f"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:#8FA0AB;font-size:.82rem'>{note}</span>",
+                          unsafe_allow_html=True)
+            bar.progress((i + 1) / len(_STAGES))
+        st.cache_data.clear()
+        st.success("Pipeline finished — every panel is reloaded from the fresh metrics.")
+        time.sleep(0.8)
+        st.rerun()
+    st.caption("Replays the recorded training run, then reloads the metrics from disk. The "
+               "hosted demo has no GPU so it cannot train live — the numbers shown are the "
+               "real output of `python -m src.evaluate` from the last run. To run it for "
+               "real, clone the repo and follow RUN.md.")

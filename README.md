@@ -201,7 +201,7 @@ src/regime/        build_climatology (WOA23 -> MLD/BLT/strat), regime_labels
 src/models/        backbone, conditioning (FiLM), physics_loss (EOS-80), oceanembed_model
 src/               data_pipeline (matching + holdouts), datasets, train, evaluate, config
 src/viz/           plots
-dashboard/app.py   Streamlit demo (6 views; reads pre-computed artefacts, no torch)
+dashboard/app.py   Streamlit demo (about + 6 views; reads pre-computed artefacts, no torch)
 data/raw/phase0_report.md      data reality check
 outputs/metrics/PHASE3_FINDINGS.md   results analysis
 ```
